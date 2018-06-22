@@ -1,3 +1,5 @@
 # riscv-vip
 
-<a href="./doc/index.html">View the docs</a>
+<a href="https://jerralph.github.io/riscv-vip/doc/index.html">View the docs</a>
+
+
