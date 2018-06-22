@@ -244,7 +244,8 @@ package riscv_vip_pkg;
     {7'b0000000,3'b101,OP} : SRL,
     {7'b0100000,3'b101,OP} : SRA,
     {7'b0000000,3'b110,OP} : OR,
-    {7'b0000000,3'b111,OP} : AND
+    {7'b0000000,3'b111,OP} : AND,
+    default                : UNKNOWN_INST                                       
   };
 
   //List of all U format instructions
@@ -317,11 +318,11 @@ package riscv_vip_pkg;
     {3'b111, OP_IMM   }  : ANDI,
     {3'b001, OP_IMM   }  : SLLI,
     {3'b101, OP_IMM   }  : SRLI, //special... requires imm[31:25] to differentiate 
-    {3'b101, OP_IMM   }  : SRAI, //special... requires imm[31:25] to differentiate
+//    {3'b101, OP_IMM   }  : SRAI, //special... requires imm[31:25] to differentiate
     {3'b000, MISC_MEM }  : FENCE,
     {3'b001, MISC_MEM }  : FENCE_I,
     {3'b000, SYSTEM   }  : ECALL,   //special... requires imm to differentiate
-    {3'b000, SYSTEM   }  : EBREAK,  //special... requires imm to differentiate
+//    {3'b000, SYSTEM   }  : EBREAK,  //special... requires imm to differentiate
     {3'b001, SYSTEM   }  : CSRRW,   
     {3'b010, SYSTEM   }  : CSRRS,
     {3'b011, SYSTEM   }  : CSRRC,
