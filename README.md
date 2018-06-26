@@ -17,7 +17,7 @@ specific language governing permissions and limitations
 under the License.
 
 
-riscv-vip
+[ riscv-vip ] 
 ======================
 
 About
@@ -45,11 +45,14 @@ Run a unit test
 2. Run the Hex file analyzer in the riscv-vip/src directory.
 
  * using the Mentor Questa Simulator.
+ ```
       $ make hex_ut
+```
 
  * Using the Cadence IUS Simulator
-			$make hex_ut SIMR=ius
-
+```
+        $make hex_ut SIMR=ius
+```
 Integrate into your verification environment
 -----------------------------------
 See the Users' Guide for information on how to integrate into your own verification environment. 
