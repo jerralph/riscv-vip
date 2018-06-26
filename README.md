@@ -30,10 +30,11 @@ Find the release notes in the RELEASE.txt file.
 
 Get riscv-vip
 ----------------------------
-
+```
    $ git clone https://github.com/jerralph/riscv-vip.git
    $ cd riscv-vip
- 
+```
+
 Poke around the code and docs.
 
 
