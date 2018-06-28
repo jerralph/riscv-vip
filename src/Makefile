@@ -21,8 +21,8 @@
 ################################################################
 
 
-SIMR := modelsim  # default, can be overriden at runtime: make inst_ut SIMR=ius
-#SIMR := ius
+SIMR ?= modelsim  # default, can be overriden at runtime: make inst_ut SIMR=ius
+#SIMR ?= ius
 
 ifeq ($(SIMR), modelsim)
 SVUNIT_SIMR_ARGS := -c_arg +cover -r "-do riscv_vip.do"
@@ -37,7 +37,7 @@ inst_ut:
 
 
 hex_ut:
-	runSVUnit -t hex_file_analyzer_unit_test.sv -s $(SIMR) -f riscv_vip.f -c_arg +cover -r "-do riscv_vip.do"
+	runSVUnit -t hex_file_analyzer_unit_test.sv -s $(SIMR) -f riscv_vip.f $(SIMR_ARGS)
 
 cov:
 	vsim -viewcov riscv_vip.ucdb
