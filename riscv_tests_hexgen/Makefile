@@ -8,6 +8,7 @@
 ARCH ?= i
 ABI  ?= ilp32
 ROOT_DIR := $(shell pwd)
+RUNTIME_REL_BUILD_DIR := ../riscv_tests_hexgen/build
 BUILD_DIR := $(ROOT_DIR)/build
 OBJ_DIR := $(BUILD_DIR)/obj
 RISCV_ISA_SRC_DIR := $(RISCV_TESTS)/isa
@@ -16,6 +17,7 @@ TESTS := $(patsubst %.S, %, $(notdir $(S_FILES)))
 OBJ := $(addprefix $(OBJ_DIR)/,$(TESTS:%=%.o))
 ELF := $(addprefix $(BUILD_DIR)/,$(TESTS:%=%.elf))
 HEX := $(addprefix $(BUILD_DIR)/,$(TESTS:%=%.hex))
+HEX_SIM := $(addprefix $(RUNTIME_REL_BUILD_DIR)/,$(TESTS:%=%.hex))
 DUMP := $(addprefix $(BUILD_DIR)/,$(TESTS:%=%.dump))
 
 RISCV_GCC_PREFIX ?= riscv32-unknown-elf-
@@ -30,7 +32,7 @@ LDFLAGS := $(RISCV_GCC_OPTS) -Tlink.ld -march=rv32$(ARCH) -mabi=$(ABI)
 default: $(ELF) $(HEX) $(DUMP) hex_file_list
 
 hex_file_list: $(BUILD_DIR)
-	@echo $(HEX) > $(BUILD_DIR)/hex_files.txt
+	@echo $(HEX_SIM) > $(BUILD_DIR)/hex_files.txt
 
 define compile_template
 $(OBJ_DIR)/$$(basename $(notdir $(SRC))).o: $$(SRC) | $(OBJ_DIR)
