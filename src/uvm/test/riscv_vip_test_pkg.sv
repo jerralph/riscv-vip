@@ -47,6 +47,6 @@ package riscv_vip_test_pkg;
   `include "riscv_vip_base_test.sv"
    
 
-endpackage : riscv_vip_env_test_pkg
+endpackage : riscv_vip_test_pkg
 
 `endif // _RISCV_VIP_TEST_PKG_INCLUDED_
