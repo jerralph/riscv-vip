@@ -1,6 +1,11 @@
 [riscv-vip] Release Notes
 
 
-v0.0 - 2018-06-22
-------
-- Inital NULL release to get stuff up on GitHub and ensure the flow is working.  Standby for more useful releases.
+pre-v0.1.0 - 2018-06-22
+---------
+- files commited and later snapshots working
+
+v0.1.0 - 2018-07-03
+---------
+- intial release.  
+
