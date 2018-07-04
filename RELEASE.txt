@@ -12,3 +12,7 @@ v0.1.0 - 2018-07-03
 v0.1.1 - 2018-07-04
 --------
 - added missing src/uvm/test*.sv files (thanks to my colleage Ram C. for finding this!)
+
+v0.1.2 - 2018-07-05
+-----------------
+- updated some wrong paths/typos in the users' guide 
