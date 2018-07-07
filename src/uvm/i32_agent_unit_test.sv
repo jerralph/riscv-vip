@@ -67,38 +67,10 @@ class i32_agent_wrapper extends i32_agent;
   function void write(i32_item item);
     m_write_cnt++;
     m_item = item;
-    m_item.print();        
-  endfunction
-
-  
-endclass
-
-
-
-
-// Mock scoreboard for receiving analysis port writes
-class mock_scoreboard extends uvm_scoreboard;
-
-  int m_write_count;
-  i32_item m_item;  
-  
-  uvm_analysis_imp #(i32_item, mock_scoreboard) m_imp;
-  
-  `uvm_component_utils(mock_scoreboard)
-  
-  function new(string name, uvm_component parent);
-    super.new(name, parent);
-    m_imp = new("imp", this);
-  endfunction
-  
-  // Mock write method that simply captures the pkt
-  function void write(i32_item item);
-    m_write_count++;
-    m_item = item;
-    m_item.print();        
   endfunction
 
 endclass
+
 
 module i32_agent_unit_test;
   import svunit_pkg::svunit_testcase;
@@ -111,7 +83,7 @@ module i32_agent_unit_test;
   // This is the UUT that we're 
   // running the Unit Tests on
   //===================================
-   i32_agent_wrapper my_i32_agent;
+  i32_agent_wrapper my_i32_agent_wrapper;
 
   logic clk;
   logic rstn; 
@@ -123,14 +95,14 @@ module i32_agent_unit_test;
   //===================================
   function void build();
     svunit_ut = new(name);
-    my_i32_agent = i32_agent_wrapper::type_id::create("", null);
+    my_i32_agent_wrapper = i32_agent_wrapper::type_id::create("", null);
 
-    assert(my_i32_agent.m_mon_ap) else $fatal("null m_mon_ap");
+    assert(my_i32_agent_wrapper.m_mon_ap) else $fatal("null m_mon_ap");
     
     uvm_config_db#(virtual riscv_vip_if)::set(uvm_root::get(), "", "m_vi",my_if);
     uvm_config_db#(int)::set(uvm_root::get(), "", "m_core_id",99);     
         
-    svunit_deactivate_uvm_component(my_i32_agent);
+    svunit_deactivate_uvm_component(my_i32_agent_wrapper);
   endfunction
 
 
@@ -146,7 +118,7 @@ module i32_agent_unit_test;
     rstn = 1;
     #1
     rstn = 0;
-    svunit_activate_uvm_component(my_i32_agent);
+    svunit_activate_uvm_component(my_i32_agent_wrapper);
 
     //-----------------------------
     // start the testing phase
@@ -169,7 +141,7 @@ module i32_agent_unit_test;
 
     /* Place Teardown Code Here */
 
-    svunit_deactivate_uvm_component(my_i32_agent);
+    svunit_deactivate_uvm_component(my_i32_agent_wrapper);
   endtask
 
 
@@ -189,34 +161,42 @@ module i32_agent_unit_test;
   `SVUNIT_TESTS_BEGIN
 
   `SVTEST(some_insts)    
-
+    i32_item i32, last_i32;
+    int item_cnt;
+   
     const logic [31:0] pc_insts [][2] = '{
 	 {0,		  i_inst_t'{imm:99    ,rs1:2,   funct3:3,   rd:1, op:LOAD}},
          {4,  	          i_inst_t'{imm:'hFF  ,rs1:1,   funct3:2,   rd:5, op:SYSTEM}},		
-         {8,         	  r_inst_t'{funct7:1, rs2:1, rs1:1, funct3:2, rd:2, op:OP}}
+         {8,         	  r_inst_t'{funct7:0, rs2:1, rs1:1, funct3:2, rd:2, op:OP}}
                                           };
-   
-
-    // Toggle interface pins
-   foreach(pc_insts[i,]) begin
-     my_if.curr_pc = pc_insts[i][0];
-     my_if.curr_inst = pc_insts[i][1];
-     toggle_clock();
-
-   end
-
-    // Stop monitor
-    disable run;
     
-    // Check that correct packet was received
-    //`FAIL_UNLESS_EQUAL(1, scoreboard.write_count);
-    //`FAIL_UNLESS_EQUAL(3, scoreboard.last_pkt);
 
+       // Toggle interface pins and check that the ap gets the expected
+       foreach(pc_insts[i,]) begin
 
+         //toggle interface
+         my_if.curr_pc = pc_insts[i][0];
+         my_if.curr_inst = pc_insts[i][1];
+         toggle_clock();
+
+         //Check the ap
+         i32 = my_i32_agent_wrapper.m_item;
+         item_cnt = my_i32_agent_wrapper.m_write_cnt;         
+         i32.print();       
+         `FAIL_UNLESS(i32 != last_i32);    //ensure a fresh item is created by the monitor
+         `FAIL_UNLESS(i32.m_addr == pc_insts[i][0]);
+         `FAIL_UNLESS(i32.m_inst_bits == pc_insts[i][1]);
+         `FAIL_UNLESS(i32.m_inst.m_inst == pc_insts[i][1]);
+         `FAIL_UNLESS(item_cnt == i+1);
+         last_i32 = i32;         
+       end
+
+       repeat(5) toggle_clock();  //burn some cycles
+       `FAIL_UNLESS(item_cnt == 3);    
+     
   `SVTEST_END
   `SVUNIT_TESTS_END
 
-  
 
   task toggle_clock();
     repeat (2) #5 clk = ~clk;
