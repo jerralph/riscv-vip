@@ -27,6 +27,7 @@
 import uvm_pkg::*;
 `include "riscv_vip_uvc_pkg.sv"
 import riscv_vip_pkg::*;
+import riscv_vip_class_pkg::*;
 import riscv_vip_uvc_pkg::*;
 import svunit_uvm_mock_pkg::*;
 
@@ -145,26 +146,35 @@ module uvc_env_unit_test;
   //===================================
   `SVUNIT_TESTS_BEGIN
 
-  `SVTEST(some_insts)    
+  //Test that the agent and cov are  instantiated and working by checking for some
+  //non-zero instruction coverage.  This utilize the fact that type-based coverage
+  //is used rather than per-instance.  Once per instance is used this will need to
+  //be updated
+  `SVTEST(see_some_coverage)    
 
-    const logic [31:0] pc_insts [][2] = '{
-	 {0,		  i_inst_t'{imm:99    ,rs1:2,   funct3:3,   rd:1, op:LOAD}},
-         {4,  	          i_inst_t'{imm:'hFF  ,rs1:1,   funct3:2,   rd:5, op:SYSTEM}},		
-         {8,         	  r_inst_t'{funct7:1, rs2:1, rs1:1, funct3:2, rd:2, op:OP}}
-                                          };
+
+    inst32_iformat i32i = new(0);     
    
+    const logic [31:0] pc_insts [][2] = '{
+         {4,  	          i_inst_t'{imm:'hFF  ,rs1:1,   funct3:2,   rd:5, op:SYSTEM}}	// I CSRRS	
+         };
 
+
+   //Expect no coverage
+   `FAIL_UNLESS(i32i.inst_cg.inst_cp.get_coverage() == 0)
+
+   
     // Toggle interface pins
    foreach(pc_insts[i,]) begin
      my_if.curr_pc = pc_insts[i][0];
      my_if.curr_inst = pc_insts[i][1];
      toggle_clock();
-
    end
 
-    // Stop monitor
-    disable run;
-
+   //Expect some coverage
+   `FAIL_UNLESS(i32i.inst_cg.inst_cp.get_coverage() > 0)
+   
+   
   `SVTEST_END
 
   `SVUNIT_TESTS_END
