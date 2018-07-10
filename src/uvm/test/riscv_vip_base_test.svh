@@ -20,7 +20,6 @@
 //
 //###############################################################
 
-
 `ifndef _RISCV_VIP_BASE_TEST_INCLUDED_
 `define _RISCV_VIP_BASE_TEST_INCLUDED_
 
@@ -66,8 +65,6 @@ class riscv_vip_base_test extends uvm_test;
    #5000000; 
    phase.drop_objection(this);
   endtask : run_phase
-
-
 
 endclass : riscv_vip_base_test
 
