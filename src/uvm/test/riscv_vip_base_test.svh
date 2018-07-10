@@ -20,7 +20,6 @@
 //
 //###############################################################
 
-`
 
 `ifndef _RISCV_VIP_BASE_TEST_INCLUDED_
 `define _RISCV_VIP_BASE_TEST_INCLUDED_
@@ -35,9 +34,9 @@ class riscv_vip_base_test extends uvm_test;
   //------------------------------------------------------------------
   // UVM macros
   //--------------------------------------------------------
-    `uvm_component_utils_begin(riscv_vip_base_test)
-        `uvm_field_object(m_uvc_env, UVM_ALL_ON)
-    `uvm_component_utils_end
+  `uvm_component_utils_begin(riscv_vip_base_test)
+     `uvm_field_object(m_uvc_env, UVM_ALL_ON)
+  `uvm_component_utils_end
 
 
   //----------------------------------------------------------------------------
@@ -45,7 +44,6 @@ class riscv_vip_base_test extends uvm_test;
   //------------------------------------------------------------------
   function new(string name, uvm_component parent=null);
     super.new(name, parent);
-    m_uvc_env = new("m_uvc_env",this); 
   endfunction
 
   //----------------------------------------------------------------------------
@@ -53,6 +51,7 @@ class riscv_vip_base_test extends uvm_test;
   //------------------------------------------------------------------
   virtual function void build_phase(uvm_phase phase);
     super.build_phase(phase);
+    m_uvc_env = uvc_env::type_id::create("m_uvc_env",this); 
   endfunction : build_phase
 
   
@@ -66,7 +65,7 @@ class riscv_vip_base_test extends uvm_test;
    phase.raise_objection(this);
    #5000000; 
    phase.drop_objection(this);
-  endtask : run 
+  endtask : run_phase
 
 
 

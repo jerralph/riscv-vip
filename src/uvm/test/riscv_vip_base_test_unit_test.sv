@@ -25,16 +25,17 @@
 `include "svunit_defines.svh"
 `include "svunit_uvm_mock_pkg.sv"
 import uvm_pkg::*;
-`include "riscv_vip_uvc_pkg.sv"
+`include "riscv_vip_test_pkg.sv"
 import riscv_vip_pkg::*;
 import riscv_vip_class_pkg::*;
 import riscv_vip_uvc_pkg::*;
+import riscv_vip_test_pkg::*;
 import svunit_uvm_mock_pkg::*;
 
-class uvc_env_uvm_wrapper extends riscv_vip_uvc_pkg::uvc_env;
+class riscv_vip_base_test_wrapper extends riscv_vip_test_pkg::riscv_vip_base_test;
 
-  `uvm_component_utils(uvc_env_uvm_wrapper)
-  function new(string name = "uvc_env_uvm_wrapper", uvm_component parent);
+  `uvm_component_utils(riscv_vip_base_test_wrapper)
+  function new(string name = "riscv_vip_base_test_wrapper", uvm_component parent);
     super.new(name, parent);
   endfunction
 
@@ -55,10 +56,10 @@ class uvc_env_uvm_wrapper extends riscv_vip_uvc_pkg::uvc_env;
   endfunction
 endclass
 
-module uvc_env_unit_test;
+module riscv_vip_base_test_unit_test;
   import svunit_pkg::svunit_testcase;
 
-  string name = "uvc_env_ut";
+  string name = "riscv_vip_base_test_unit_test_ut";
   svunit_testcase svunit_ut;
 
 
@@ -66,7 +67,7 @@ module uvc_env_unit_test;
   // This is the UUT that we're 
   // running the Unit Tests on
   //===================================
-  uvc_env_uvm_wrapper my_uvc_env;
+  riscv_vip_base_test_wrapper my_test;
 
   logic clk;
   logic rstn; 
@@ -80,12 +81,24 @@ module uvc_env_unit_test;
   function void build();
     svunit_ut = new(name);
 
-    my_uvc_env = uvc_env_uvm_wrapper::type_id::create("my_uvm_env", null);
+    my_test = riscv_vip_base_test_wrapper::type_id::create("my_test", null);
 
-    uvm_config_db#(virtual riscv_vip_if)::set(my_uvc_env, "m_i32_agent[0]", "m_vi",my_if);
-    uvm_config_db#(int)::set(my_uvc_env, "m_i32_agent[0]", "m_core_id",199);     
     
-    svunit_deactivate_uvm_component(my_uvc_env);
+    uvm_config_db#(virtual riscv_vip_if)::set(
+      my_test,
+      "m_uvc_env.m_i32_agent[0]",
+      "m_vi",
+      my_if
+      );
+    
+    uvm_config_db#(int)::set(
+      my_test,
+      "m_uvc_env.m_i32_agent[0]",
+      "m_core_id",
+      0
+      );
+     
+    svunit_deactivate_uvm_component(my_test);
   endfunction
 
 
@@ -100,7 +113,9 @@ module uvc_env_unit_test;
     #1
     rstn = 0;
 
-    svunit_activate_uvm_component(my_uvc_env);
+
+    
+    svunit_activate_uvm_component(my_test);
 
     //-----------------------------
     // start the testing phase
@@ -125,7 +140,7 @@ module uvc_env_unit_test;
 
     /* Place Teardown Code Here */
 
-    svunit_deactivate_uvm_component(my_uvc_env);
+    svunit_deactivate_uvm_component(my_test);
   endtask
 
 
