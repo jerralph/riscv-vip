@@ -37,8 +37,5 @@ agent_ut:
 env_ut:
 	runSVUnit -uvm -t uvc_env_unit_test.sv -s $(SIMR) -f riscv_vip_uvc.f
 
-cov:
-	vsim -viewcov riscv_vip.ucdb
-
 clean:
 	rm -Rf work/*
