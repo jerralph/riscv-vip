@@ -16,3 +16,9 @@ v0.1.1 - 2018-07-04
 v0.1.2 - 2018-07-05
 -----------------
 - updated some wrong paths/typos in the users' guide 
+
+v0.1.3 - 2018-07-10
+-----------------
+- updated/clarified docs, riscv-test hex_file_analyzer hex file gen section
+- beefed up i32_agent uvc_env unit tests
+- added uvm test unit test
