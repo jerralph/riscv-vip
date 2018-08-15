@@ -29,7 +29,7 @@ class i32_monitor extends uvm_monitor;
 
   const static string         TRACKER_FN = "riscv_tracker_%0d.log";
   int                         m_core_id = -1;    
-  virtual riscv_vip_if        m_vi;
+  virtual riscv_vip_inst_if        m_vi;
   decoder                     m_decoder;
   int                         m_tracker_file;
   logic [31:0]                m_last_pc = 'hFFFFFFFE;  

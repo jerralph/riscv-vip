@@ -1,5 +1,4 @@
 
-
 //###############################################################
 //
 //  Licensed to the Apache Software Foundation (ASF) under one
@@ -21,33 +20,25 @@
 //
 //###############################################################
 
-`ifndef _RISCV_VIP_CLASS_PKG_SV_
-`define _RISCV_VIP_CLASS_PKG_SV_
 
-package riscv_vip_class_pkg;     
+`ifndef _RISCV_VIP_REGFILE_IF_INCLUDED_
+`define _RISCV_VIP_REGFILE_IF_INCLUDED_
 
-  import riscv_vip_pkg::*;   
+import riscv_vip_pkg::*;
+
+/* This is a white box interface into the values of the register file.  Making this
+ * more transactional to use a rd/wr type memory i/f was considered but
+ * different risc-v implementations may do it differently.  Some may not even use
+ * a regifile but simply use flip flops. The most flexible and simplist route for 
+ * now is to go with the raw values of the register values.  At some point there
+ * may be a need for a strobe or something to know when a given register is 
+ * read or written.
+ */
+interface riscv_vip_regfile_if (input clk, input rstn);
+
+   riscv_vip_pkg::x_regfile_t x;
+   assign x[0] = 0;    //Note x[0] must be 0
    
-  //Forward class definitions
-  typedef class decoder;   
-  typedef class inst16;
-  typedef class inst16_ciformat;  
-  typedef class inst32;
-  typedef class inst32_rformat;
-  typedef class inst32_iformat;
-  typedef class inst32_sformat;
-  typedef class inst32_bformat;
-  typedef class inst32_uformat;         
-  typedef class inst32_jformat;         
-     
-  `include "instruction.svh"
-  `include "decoder.svh"
-  `include "regfile.svh"
-  `include "csrs.svh"
-  `include "pipeline.svh"
-  `include "hex_file_analyzer.svh"
-   
-endpackage 
+endinterface
 
-`endif 
-
+`endif

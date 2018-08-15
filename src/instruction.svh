@@ -46,6 +46,13 @@ virtual class inst32;
   rand inst_t  m_inst;
   rvg_format_t m_rvg_format  = UNKNOWN;
   inst_enum_t  m_inst_enum;
+
+  bit [63:0] m_decode_cycle;  //The value of the cycle CSR when instruction decoded
+  
+  //Member fields for the values of the register pointed to by the rs1/2 fields.
+  //These are only relevant for instructions that that have rs1 and/or rs2
+  xlen_t       m_rs1_val = 'x;
+  xlen_t       m_rs2_val = 'x;
   
   covergroup inst_cg ();
     inst_cp : coverpoint m_inst_enum;
@@ -71,22 +78,26 @@ virtual class inst32;
   virtual function bit is_i_format();
     return (m_rvg_format == I);    
   endfunction
+
   virtual function bit is_u_format();
     return (m_rvg_format == U);    
   endfunction
+
   virtual function bit is_j_format();
     return (m_rvg_format == J);    
   endfunction
+
   virtual function bit is_b_format();
     return (m_rvg_format == B);    
   endfunction
+
   virtual function bit is_s_format();
     return (m_rvg_format == S);    
   endfunction
+
   virtual function bit is_r_format();
     return (m_rvg_format == R);    
-  endfunction
-     
+  endfunction   
    
   virtual function bit has_rd();
     return (!(m_rvg_format inside {B,S}));      
@@ -106,6 +117,22 @@ virtual class inst32;
     return reg_id_t'(m_inst.b_inst.rs1);      
   endfunction    
 
+  //Set the value of the rs1 register referenced by the instruction.
+  //This is generally the value of x[rs1] at the when the instruction in at the 
+  //decode stage of the pipeline.  For data hazards the value may be different 
+  virtual function void set_rs1_val(xlen_t val);
+    assert(has_rs1()) else $fatal(1);      
+    m_rs1_val = val;    
+  endfunction   
+
+  //Get the value of the x[rs1] as referenced by the rs1 field of the instruction
+  //This is the value of x[rs1] from the reg file at decode stage and may be different than the 
+  //x[rs1] in the case of data pipeline hazards - beware! 
+  virtual function xlen_t get_rs1_val();
+    assert(has_rs1() && m_rs1_val !== 'x ) else $fatal(1);      
+    return m_rs1_val;  
+  endfunction   
+      
   virtual function bit has_rs2();
     return (m_rvg_format inside {B,S,R});
   endfunction // has_rs2
@@ -114,6 +141,22 @@ virtual class inst32;
     assert(has_rs2()) else $fatal(1);      
     return reg_id_t'(m_inst.b_inst.rs2);
   endfunction    
+
+  //Set the value of the rs2 register referenced by the instruction.
+  //This is generally the value of x[rs2] at the when the instruction in at the 
+  //decode stage of the pipeline.  For data hazards the value may be different 
+  virtual function void set_rs2_val(xlen_t val);
+    assert(has_rs2()) else $fatal(1);      
+    m_rs2_val = val;    
+  endfunction   
+
+  //Get the value of the x[rs2] as referenced by the rs2 field of the instruction
+  //This is the value of x[rs2] from the reg file at decode stage and may be different than the 
+  //x[rs2] in the case of data pipeline hazards - beware! 
+  virtual function xlen_t get_rs2_val();
+    assert(has_rs2() && m_rs2_val !== 'x ) else $fatal(1);      
+    return m_rs2_val;  
+  endfunction   
 
   virtual function bit has_imm();
     return (m_rvg_format != R);      
@@ -163,9 +206,13 @@ virtual class inst32;
       U,J: begin
         inst  = uj_inst_by_major[get_rvg_major_opcode()];
       end
-    endcase
+    endcase // case (m_rvg_format)
+
+    //set the member variable 
     m_inst_enum = inst;
+
     return inst;
+    
   endfunction    
       
   virtual function string get_name_string();
@@ -201,8 +248,6 @@ virtual class inst32;
   
 endclass // instruction
 
-
-
 /**
  * CLASS: inst32_sformat
  * 
@@ -211,6 +256,7 @@ endclass // instruction
  */ 
 class inst32_sformat extends inst32;
 
+  //This is useful for unit testing
   static function inst32_sformat new_from_funct3_imm(decoder my_decoder, 
                                                      funct3_t funct3, 
                                                      imm_low_t imm
@@ -287,13 +333,12 @@ class inst32_sformat extends inst32;
        int sint = signed'(get_imm());
        return $psprintf("%0d",sint);
   endfunction     
-
   
   virtual function funct3_t get_funct3();
     return m_inst.s_inst.funct3;
   endfunction
 
-  //Store's are a bit non-standard in assembly representation
+  //Store instructions are a bit non-standard in assembly representation
   //override the base class's defintion
   //Assembly is: sh rs2, offset(rs1)
   virtual function string to_string();
@@ -337,9 +382,6 @@ class inst32_rformat extends inst32;
   
 endclass // inst32_rformat
 
-
-
-
 /**
  * CLASS: inst32_iformat
  * 
@@ -348,6 +390,7 @@ endclass // inst32_rformat
  */    
 class inst32_iformat extends inst32;
 
+  //useful for unit testing
   static function inst32_iformat new_from_funct3_shamt_imm(
                                                            decoder my_decoder,
                                                            funct3_t funct3,
@@ -373,7 +416,8 @@ class inst32_iformat extends inst32;
     return i32i;    
 
   endfunction
-   
+
+  //useful for unit testing
   static function inst32_iformat new_nonspecial_from_op_funct3_imm(
                                                                    decoder my_decoder, 
                                                                    funct3_t funct3,
@@ -501,7 +545,7 @@ endclass
  */    
 class inst32_bformat extends inst32;
 
-  
+  //useful for unit testing
   static function inst32_bformat new_from_funct3_imm(decoder my_decoder, 
                                                      funct3_t funct3, 
                                                      b_imm_t imm
@@ -555,11 +599,13 @@ class inst32_bformat extends inst32;
     m_rvg_format = B;
     imm_cg = new(get_imm(),get_inst_enum());        
   endfunction			   
+
   //The B format imm has 12:1 in inst.. this method adds back the 0 lsb
   virtual function b_imm_t get_imm();
     b_inst_t b = m_inst.b_inst;      
     return {b.imm_12, b.imm_11, b.imm_10_5, b.imm_4_1,1'b0};      
   endfunction // get_imm
+
   virtual function string get_imm_string();
     int  sint = signed'(get_imm());    
     return $psprintf("%0d",sint);
@@ -576,12 +622,9 @@ class inst32_bformat extends inst32;
   
 endclass // inst32_bformat
 
-
-
-
-   
 class inst32_uformat extends inst32;
 
+  //useful for unit testing
   static function inst32_uformat new_from_op_imm(decoder my_decoder,
                                                  opcode_t op,
                                                  imm_high_t imm
@@ -650,11 +693,10 @@ class inst32_uformat extends inst32;
   endfunction      
 endclass // inst32_uformat
 
-
-
    
 class inst32_jformat extends inst32;
 
+  //useful for unit testing
   static function inst32_jformat new_from_imm(decoder my_decoder,
                                               j_imm_t imm
                                               );
@@ -676,8 +718,7 @@ class inst32_jformat extends inst32;
     return i32j;    
   endfunction
     
- 
-  protected static function j_inst_t set_imm(j_inst_t in, j_imm_t imm);
+   protected static function j_inst_t set_imm(j_inst_t in, j_imm_t imm);
     j_inst_t ret = in;
     {ret.imm_20,ret.imm_19_12,ret.imm_11,ret.imm_10_1} = (imm>>>1); //sign extend
     return ret;    
@@ -698,7 +739,6 @@ class inst32_jformat extends inst32;
     //TODO VR for dest reg
   endgroup
 
-
   function new(inst_t inst);     
     super.new(inst);  
     m_rvg_format = J;   
@@ -713,17 +753,18 @@ class inst32_jformat extends inst32;
   virtual function real get_imm_cov();
     return imm_cg.i32j_imm_cp.get_coverage();
   endfunction
-  
 	
    //The J format imm has 20:1 in inst.. this method adds back the 0 lsb
   virtual function j_imm_t get_imm();
     j_inst_t j = m_inst.j_inst;            
     return {j.imm_20,j.imm_19_12,j.imm_11,j.imm_10_1,1'b0};      
   endfunction   
-  virtual function string get_imm_string();
+ 
+ virtual function string get_imm_string();
     int sint = signed'(get_imm());
     return $psprintf("%0d",sint);
   endfunction      
+
 endclass // inst32_jformat
    
 	      

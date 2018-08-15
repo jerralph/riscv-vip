@@ -39,6 +39,9 @@ inst_ut:
 hex_ut:
 	runSVUnit -t hex_file_analyzer_unit_test.sv -s $(SIMR) -f riscv_vip.f $(SIMR_ARGS)
 
+csrs_ut:
+	runSVUnit -t csrs_unit_test.sv -s $(SIMR) -f riscv_vip.f $(SIMR_ARGS)
+
 cov:
 	vsim -viewcov riscv_vip.ucdb
 

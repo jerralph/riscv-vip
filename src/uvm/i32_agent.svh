@@ -29,7 +29,7 @@ class i32_agent extends uvm_agent;
 
   protected uvm_active_passive_enum m_is_active = UVM_PASSIVE;
   i32_monitor m_monitor;
-  virtual riscv_vip_if m_vi;
+  virtual riscv_vip_inst_if m_vi;
   int    m_core_id = -1;    
 
   uvm_analysis_port #(i32_item) m_mon_ap;
@@ -46,7 +46,7 @@ class i32_agent extends uvm_agent;
     bit has_vi;
     bit has_core_id;    
     super.build_phase(phase);
-    has_vi = uvm_config_db#(virtual riscv_vip_if)::get(this, "", "m_vi", m_vi);
+    has_vi = uvm_config_db#(virtual riscv_vip_inst_if)::get(this, "", "m_vi", m_vi);
     has_core_id = uvm_config_db#(int)::get(this, "", "m_core_id", m_core_id);
     `uvm_info("i32_agent"," build_phase() called",UVM_HIGH);
     m_monitor = i32_monitor::type_id::create("m_monitor",this);    

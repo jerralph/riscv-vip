@@ -42,7 +42,11 @@ package riscv_vip_pkg;
   parameter int unsigned IMM_B_W     = (31-25+1)+(11-7+1)+1; //+1 since B drops bit 0   
   parameter int unsigned SHAMT_W     = 24-20+1;              //shift amount
 
-  parameter int unsigned RV_ADDR_W = 32;   
+  parameter int unsigned RV_ADDR_W   = 32;  
+  parameter int unsigned XLEN        = 32;  //The size of the x registers 
+  parameter int unsigned NUM_X_REGS  = 32;  //The number of x registers
+  parameter int unsigned CSR_W       = 64;
+ 
 
   //Instruction Common bit/logic types
   typedef logic [OPCODE_W-1   :0] opcode_t;
@@ -56,10 +60,24 @@ package riscv_vip_pkg;
   typedef logic [IMM_B_W-1    :0] b_imm_t;     //B immediate, includes bit 0
   typedef logic [SHAMT_W-1    :0] shamt_t;     //I type's shift amount field
    
-  typedef logic  [RV_ADDR_W-1  :0] rv_addr_t;
+  typedef logic [RV_ADDR_W-1  :0] rv_addr_t;
+  
+  //General purpose registers
+  typedef logic [XLEN-1      :0]  xlen_t;                  //general purpose reg xn 
+  typedef logic [NUM_X_REGS][XLEN-1      :0] x_regfile_t;  //general purpose regs x0-x31... 
+    
+  //CSRs
+  typedef logic [CSR_W-1     :0]  csr_t; 
+  typedef enum {
+    CYCLE
+  } csr_id_t;
+  
+  //Many more CSR fields to be added as support grows
+  typedef struct packed { 
+    csr_t cycle;
+  } csrs_t;
    
-   
-  //R instruciton type (reg/reg ops)
+  //R instruction type (reg/reg ops)
   typedef struct packed {
     funct7_t  	        funct7;
     regsel_t  	        rs2;

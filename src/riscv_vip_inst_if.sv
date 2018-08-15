@@ -21,33 +21,15 @@
 //
 //###############################################################
 
-`ifndef _RISCV_VIP_CLASS_PKG_SV_
-`define _RISCV_VIP_CLASS_PKG_SV_
 
-package riscv_vip_class_pkg;     
+`ifndef _RISCV_VIP_INST_IF_INCLUDED_
+`define _RISCV_VIP_INST_IF_INCLUDED_
 
-  import riscv_vip_pkg::*;   
+interface riscv_vip_inst_if (input clk, input rstn);
    
-  //Forward class definitions
-  typedef class decoder;   
-  typedef class inst16;
-  typedef class inst16_ciformat;  
-  typedef class inst32;
-  typedef class inst32_rformat;
-  typedef class inst32_iformat;
-  typedef class inst32_sformat;
-  typedef class inst32_bformat;
-  typedef class inst32_uformat;         
-  typedef class inst32_jformat;         
-     
-  `include "instruction.svh"
-  `include "decoder.svh"
-  `include "regfile.svh"
-  `include "csrs.svh"
-  `include "pipeline.svh"
-  `include "hex_file_analyzer.svh"
+   logic [31:0]  curr_pc;
+   logic [31:0] curr_inst;
    
-endpackage 
+endinterface
 
-`endif 
-
+`endif

@@ -23,13 +23,13 @@
 
 
 `include "svunit_defines.svh"
-`include "svunit_uvm_mock_pkg.sv"
+//`include "svunit_uvm_mock_pkg.sv"
 import uvm_pkg::*;
 `include "riscv_vip_uvc_pkg.sv"
 import riscv_vip_pkg::*;
 import svunit_pkg::*;
 import riscv_vip_uvc_pkg::*;
-import svunit_uvm_mock_pkg::*;
+//import svunit_uvm_mock_pkg::*;
 
 
 class i32_agent_wrapper extends i32_agent;
@@ -87,7 +87,7 @@ module i32_agent_unit_test;
 
   logic clk;
   logic rstn; 
-  riscv_vip_if my_if(.*);
+  riscv_vip_inst_if my_if(.*);
    
 
   //===================================
@@ -99,7 +99,7 @@ module i32_agent_unit_test;
 
     assert(my_i32_agent_wrapper.m_mon_ap) else $fatal("null m_mon_ap");
     
-    uvm_config_db#(virtual riscv_vip_if)::set(uvm_root::get(), "", "m_vi",my_if);
+    uvm_config_db#(virtual riscv_vip_inst_if)::set(uvm_root::get(), "", "m_vi",my_if);
     uvm_config_db#(int)::set(uvm_root::get(), "", "m_core_id",99);     
         
     svunit_deactivate_uvm_component(my_i32_agent_wrapper);
