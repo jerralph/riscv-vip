@@ -134,9 +134,9 @@ module inst32_unit_test;
 
       //create some instructions to decode
       inst_t insts[3];
-      insts[0] = i_inst_t'{imm:99    ,rs1:2,   funct3:3,   rd:1, op:LOAD};
-      insts[1] = i_inst_t'{imm:'hFF  ,rs1:1,   funct3:2,   rd:5, op:SYSTEM};
-      insts[2] = r_inst_t'{funct7:0, rs2:1, rs1:1, funct3:2, rd:2, op:OP};
+      insts[0] = create_i_inst(._imm(99), ._rs1(2), ._funct3(3), ._rd(1), ._op(LOAD));
+      insts[1] = create_i_inst(._imm('hFF), ._rs1(1), ._funct3(2), ._rd(5), ._op(SYSTEM));
+      insts[2] = create_r_inst(._funct7(0), ._rs2(1), ._rs1(1), ._funct3(2), ._rd(2), ._op(OP));
 
       //decode instructions and make sure they decoded into the classes the way expected       
       i32 = my_decoder.decode_inst32(insts[0]);
@@ -518,5 +518,39 @@ module inst32_unit_test;
     `FAIL_UNLESS_LOG(int'(cov) == int'(exp_cov), $psprintf("SHAMT imm_cov() = %d, expect %d",cov,exp_cov))
 
   endtask      
-   
+
+  function i_inst_t create_i_inst(imm_low_t _imm,
+                                  regsel_t _rs1,
+                                  funct3_t _funct3,
+                                  regsel_t _rd,
+                                  opcode_t _op);
+    i_inst_t _i_inst;
+
+    _i_inst.imm = _imm;
+    _i_inst.rs1 = _rs1;
+    _i_inst.funct3 = _funct3;
+    _i_inst.rd = _rd;
+    _i_inst.op = _op;
+
+    return _i_inst;
+  endfunction
+
+  function i_inst_t create_r_inst(funct7_t _funct7,
+                                  regsel_t _rs2,
+                                  regsel_t _rs1,
+                                  funct3_t _funct3,
+                                  regsel_t _rd,
+                                  opcode_t _op);
+    r_inst_t _r_inst;
+
+    _r_inst.funct7 = _funct7;
+    _r_inst.rs2 = _rs2;
+    _r_inst.rs1 = _rs1;
+    _r_inst.funct3 = _funct3;
+    _r_inst.rd = _rd;
+    _r_inst.op = _op;
+
+    return _r_inst;
+  endfunction
+
 endmodule
