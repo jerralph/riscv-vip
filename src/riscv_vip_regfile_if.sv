@@ -36,9 +36,11 @@ import riscv_vip_pkg::*;
  */
 interface riscv_vip_regfile_if (input clk, input rstn);
 
-   riscv_vip_pkg::x_regfile_t x;
-   assign x[0] = 0;    //Note x[0] must be 0
+  //NOTE regfile is 1-31 and index 0 is not included since it's always zero
+   riscv_vip_pkg::x_regfile_array_t x;
    
 endinterface
 
 `endif
+
+

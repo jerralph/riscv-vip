@@ -64,7 +64,9 @@ package riscv_vip_pkg;
   
   //General purpose registers
   typedef logic [XLEN-1      :0]  xlen_t;                  //general purpose reg xn 
-  typedef logic [NUM_X_REGS][XLEN-1      :0] x_regfile_t;  //general purpose regs x0-x31... 
+  
+  //general purpose regs x1-x31..., note NUM_X_REG-1 since x0 (const zero) excluded
+  typedef logic [NUM_X_REGS-1:1][XLEN-1      :0] x_regfile_array_t;   
     
   //CSRs
   typedef logic [CSR_W-1     :0]  csr_t; 
