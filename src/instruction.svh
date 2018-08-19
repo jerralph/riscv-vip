@@ -251,7 +251,7 @@ class inst32_sformat extends inst32;
       bins min_neg =  {`IMM_MIN_NEG(imm)}; 
     }
     i32s_insts_cp : coverpoint inst {
-      bins s_insts[] = S_INSTS;
+      bins s_insts[] = {SB,SH,SW};
     }
     i32s_inst_x_imm :cross i32s_insts_cp, i32s_imm_cp;
     //TODO VR to cross the value of the register with the offset...
@@ -427,10 +427,21 @@ class inst32_iformat extends inst32;
       bins max_legal     = {5'b01111};
     } 
     i32i_nonspecial_insts_cp : coverpoint inst {
-      bins i_nonspecial_insts[] = I_NONSPECIAL_INSTS;
+      bins i_nonspecial_insts[] = {JALR,
+                                   LB,
+                                   LH,
+                                   LW,
+                                   LBU,
+                                   LHU,
+                                   ADDI,
+                                   SLTI,
+                                   SLTIU,
+                                   XORI,
+                                   ANDI
+                                   };
     }
     i32i_shamt_insts_cp : coverpoint inst {
-      bins i_shamt_insts[] = I_SHAMT_INSTS;            
+      bins i_shamt_insts[] = {SLLI, SRLI, SRAI};
     }
     i32i_inst_x_imm :cross i32i_nonspecial_insts_cp, i32i_imm_cp;
     i32i_shamt_inst_x_shamt : cross i32i_shamt_insts_cp, i32i_shamt_cp;
@@ -542,7 +553,7 @@ class inst32_bformat extends inst32;
       bins min_neg =  {`IMM_MIN_NEG(imm)}; 
     }
     i32b_insts_cp : coverpoint inst {
-      bins b_insts[] = B_INSTS;
+      bins b_insts[] = {BEQ, BNE, BLT, BGE, BLTU, BGEU};
     }
     i32b_inst_x_imm :cross i32b_insts_cp, i32b_imm_cp;
     //TODO VR to cross the value of the register with the offset...
@@ -620,7 +631,7 @@ class inst32_uformat extends inst32;
       bins min_neg =  {`IMM_MIN_NEG(imm)}; 
     }
     i32u_insts_cp : coverpoint inst {
-      bins u_insts[] = U_INSTS;
+      bins u_insts[] = {LUI,AUIPC};
     }
     i32u_inst_x_imm :cross i32u_insts_cp, i32u_imm_cp;
     //TODO VR for dest reg
@@ -692,7 +703,7 @@ class inst32_jformat extends inst32;
       bins min_neg =  {`IMM_MIN_NEG(imm)}; 
     }
     i32j_insts_cp : coverpoint inst {
-      bins j_insts[] = J_INSTS;
+      bins j_insts[] = {JAL};
     }
     i32j_uinst_x_imm :cross i32j_insts_cp, i32j_imm_cp;
     //TODO VR for dest reg
