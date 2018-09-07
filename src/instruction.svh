@@ -418,7 +418,7 @@ class inst32_iformat extends inst32;
   endfunction
 
   //useful for unit testing
-  static function inst32_iformat new_nonspecial_from_op_funct3_imm(
+  static function inst32_iformat new_nonspecial_from_funct3_op_imm(
                                                                    decoder my_decoder, 
                                                                    funct3_t funct3,
                                                                    opcode_t op,

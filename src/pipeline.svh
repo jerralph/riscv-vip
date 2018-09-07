@@ -1,5 +1,4 @@
 
-
 //###############################################################
 //
 //  Licensed to the Apache Software Foundation (ASF) under one
@@ -21,34 +20,14 @@
 //
 //###############################################################
 
-`ifndef _RISCV_VIP_CLASS_PKG_SV_
-`define _RISCV_VIP_CLASS_PKG_SV_
+`ifndef _PIPELINE_INCLUDED_
+`define _PIPELINE_INCLUDED_
 
-package riscv_vip_class_pkg;     
+class pipeline#(int DEPTH = 5);  
+  
+  inst32 m_inst_fifo [$:DEPTH];
 
-  import riscv_vip_pkg::*;   
-   
-  //Forward class definitions
-  typedef class decoder;   
-  typedef class inst16;
-  typedef class inst16_ciformat;  
-  typedef class inst32;
-  typedef class inst32_rformat;
-  typedef class inst32_iformat;
-  typedef class inst32_sformat;
-  typedef class inst32_bformat;
-  typedef class inst32_uformat;         
-  typedef class inst32_jformat;         
-     
-  `include "instruction.svh"
-  `include "decoder.svh"
-  `include "regfile.svh"
-  `include "reg_fetcher.svh"
-  `include "csrs.svh"
-  `include "pipeline.svh"
-  `include "hex_file_analyzer.svh"
-   
-endpackage 
 
-`endif 
-
+endclass 
+ 
+`endif

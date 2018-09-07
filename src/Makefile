@@ -44,6 +44,10 @@ csrs_ut:
 rf_ut:
 	runSVUnit -t regfile_unit_test.sv -s $(SIMR) -f riscv_vip.f $(SIMR_ARGS)
 
+rfet_ut:
+	runSVUnit -t reg_fetcher_unit_test.sv -s $(SIMR) -f riscv_vip.f $(SIMR_ARGS)
+
+
 cov:
 	vsim -viewcov riscv_vip.ucdb
 

@@ -28,19 +28,20 @@
 //Decode bits into a verif object model
 class decoder;
 
-  bit[15:0]             m_parcels[];
+  bit[15:0]           m_parcels[];
   int       unsigned  m_parcel_index;
   int       unsigned  m_num_parcels;
   static bit          m_strict = 0;
   static bit          m_enable_c_type = 0;  //Enable [C]ompressed instruction set
 
   static function int unsigned calc_num_parcels(bit[15:0] parcel0);
-    if (parcel0[1:0] != 2'b11)
+    if (parcel0[1:0] != 2'b11) begin
       return 1;
-    else if (parcel0[5:2] != 3'b111)
+    end else if (parcel0[5:2] != 3'b111) begin
       return 2;
-    else if (m_strict)
+    end else if (m_strict) begin
       $fatal(1, $psprintf("UNUSPPORTED -- FUTURE, %016h",parcel0));
+    end
   endfunction // get_len
 
   //Decode how many parcels need to be fetched from the instruction length encoding
@@ -102,28 +103,34 @@ class decoder;
     //there are remaining_parcels parcels to the instruction
     remaining_parcels = decode_len(inst_arg[15:0]);
 
-    if (remaining_parcels != 1)
+    if (remaining_parcels != 1) begin
       // this is not a 32 bit instruction...
-      if (m_strict)
+      if (m_strict) begin
         $fatal(1,$psprintf("undecodable inst %h",inst_arg));
-      else
+      end else begin
         return null;
-
+      end
+    end
+    
     while(need_next_parcel()) begin
       set_next_parcel(inst_arg[31:16]);   //will need an update for >32 bit
     end
 
-    if (m_num_parcels != 2)
-      if (m_strict)
+    if (m_num_parcels != 2) begin
+      if (m_strict) begin
         $fatal(1,"num_parcels != 2");
-      else
+      end else begin
         return null;
+      end
+    end
 
     inst = {m_parcels[1],m_parcels[0]};
     rvg_major_opcode = rvg_major_opcode_t'(inst[6:0]);
     rvg_format = rvg_format_by_major[rvg_major_opcode];
 
-    if (rvg_format == UNKNOWN) return null;
+    if (rvg_format == UNKNOWN) begin 
+       return null;
+    end
 
     case (rvg_format)
       R: begin

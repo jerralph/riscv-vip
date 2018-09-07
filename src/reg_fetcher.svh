@@ -1,5 +1,6 @@
 
 
+
 //###############################################################
 //
 //  Licensed to the Apache Software Foundation (ASF) under one
@@ -21,34 +22,32 @@
 //
 //###############################################################
 
-`ifndef _RISCV_VIP_CLASS_PKG_SV_
-`define _RISCV_VIP_CLASS_PKG_SV_
+`ifndef _REG_FETCHER_INCLUDED_
+`define _REG_FETCHER_INCLUDED_
 
-package riscv_vip_class_pkg;     
+// This fetches the general purpose reg values for a given instruction 
+// from the regfile
+class reg_fetcher;  
 
-  import riscv_vip_pkg::*;   
-   
-  //Forward class definitions
-  typedef class decoder;   
-  typedef class inst16;
-  typedef class inst16_ciformat;  
-  typedef class inst32;
-  typedef class inst32_rformat;
-  typedef class inst32_iformat;
-  typedef class inst32_sformat;
-  typedef class inst32_bformat;
-  typedef class inst32_uformat;         
-  typedef class inst32_jformat;         
-     
-  `include "instruction.svh"
-  `include "decoder.svh"
-  `include "regfile.svh"
-  `include "reg_fetcher.svh"
-  `include "csrs.svh"
-  `include "pipeline.svh"
-  `include "hex_file_analyzer.svh"
-   
-endpackage 
+  protected  regfile m_regfile; 
 
-`endif 
+  virtual function void set_m_regfile(regfile rf);
+    this.m_regfile = rf;
+  endfunction : set_m_regfile  
+
+  virtual function void fetch_regs(inst32 i32);
+    if (i32.has_rs1()) begin
+      i32.set_rs1_val(m_regfile.get_x(i32.get_rs1()));      
+    end 
+    if (i32.has_rs2()) begin
+      i32.set_rs2_val(m_regfile.get_x(i32.get_rs2()));
+    end
+
+  endfunction
+
+endclass 
+
+`endif
+ 
+
 
