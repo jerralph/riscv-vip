@@ -36,7 +36,7 @@ module reg_fetcher_unit_test;
   logic clk;
   logic rstn; 
   
-  //regfiel interface
+  //regfile interface
   riscv_vip_regfile_if regfile_if(.*);
   monitored_regfile my_regfile = new();
 
@@ -142,7 +142,6 @@ module reg_fetcher_unit_test;
       
       reg_fetcher uut = new();
       uut.set_m_regfile(my_regfile);
-
 
       //X out everything
       for(int i=1; i< 32; i++) begin

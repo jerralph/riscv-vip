@@ -24,7 +24,9 @@
 `ifndef _RISCV_VIP_UVC_PKG_SV_
 `define _RISCV_VIP_UVC_PKG_SV_
 
-`include "riscv_vip_if.svh"
+`include "riscv_vip_inst_if.sv"
+`include "riscv_vip_regfile_if.sv"
+`include "riscv_vip_csr_if.sv"
 
 package riscv_vip_uvc_pkg;
 

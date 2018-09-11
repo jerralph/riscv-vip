@@ -36,6 +36,10 @@ module csrs_unit_test;
   logic clk;
   logic rstn; 
   riscv_vip_csr_if csr_if(.*);
+  //Below needed to please simulator.  Even if _if is not used the simulatore
+  //needs to see that it gets assigned somewhere for the class that references it
+  riscv_vip_regfile_if regfile_if(.*);
+  monitored_regfile my_regfile = new();
 
 
   //===================================
@@ -59,6 +63,7 @@ module csrs_unit_test;
   task setup();
     svunit_ut.setup();
     /* Place Setup Code Here */
+    my_regfile.set_m_vif(regfile_if);    
     
     //Toggle reset
     clk = 0;

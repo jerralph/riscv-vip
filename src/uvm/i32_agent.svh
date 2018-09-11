@@ -30,6 +30,7 @@ class i32_agent extends uvm_agent;
   protected uvm_active_passive_enum m_is_active = UVM_PASSIVE;
   i32_monitor m_monitor;
   virtual riscv_vip_inst_if m_vi;
+  virtual riscv_vip_regfile_if m_rf_vi;
   int    m_core_id = -1;    
 
   uvm_analysis_port #(i32_item) m_mon_ap;
@@ -44,13 +45,15 @@ class i32_agent extends uvm_agent;
 
   virtual function void build_phase(uvm_phase phase);
     bit has_vi;
+    bit has_rf_vi;
     bit has_core_id;    
     super.build_phase(phase);
     has_vi = uvm_config_db#(virtual riscv_vip_inst_if)::get(this, "", "m_vi", m_vi);
+    has_rf_vi = uvm_config_db#(virtual riscv_vip_regfile_if)::get(this, "", "m_rf_vi", m_rf_vi);
     has_core_id = uvm_config_db#(int)::get(this, "", "m_core_id", m_core_id);
     `uvm_info("i32_agent"," build_phase() called",UVM_HIGH);
     m_monitor = i32_monitor::type_id::create("m_monitor",this);    
-    assert(has_vi && has_core_id) else `uvm_fatal("has_vi && has_core_id","m_vi or m_core_id not in config_db");    
+    assert(has_vi && has_rf_vi && has_core_id) else `uvm_fatal("has_vi && has_rf_vi && has_core_id","m_vi, m_rf_vi, or m_core_id not in config_db");    
     m_monitor.m_core_id = m_core_id;        
     m_monitor.m_vi = m_vi;
   endfunction // build_phase
