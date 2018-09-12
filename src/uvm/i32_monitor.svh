@@ -60,13 +60,23 @@ class i32_monitor extends uvm_monitor;
   endtask // run_phase
 
   virtual protected task do_monitor();
+    event  do_trasact_e;
 
     @(negedge m_vi.rstn);
-    forever begin
-      @(posedge m_vi.clk && m_vi.curr_pc !== m_last_pc);
-      transact();
-      m_last_pc = m_vi.curr_pc;      
-    end      
+    //Two processes synced with an event to overcome race possibility
+    //between posedge clk for i32_monitor and monitored_regfile in
+    //grabbing register file values for decoded instruction
+    fork
+      forever begin
+        @(posedge m_vi.clk && m_vi.curr_pc !== m_last_pc);
+        ->do_trasact_e;
+        m_last_pc = m_vi.curr_pc;      
+      end 
+      forever begin
+        wait( do_trasact_e );
+        transact();
+      end
+    join_none
   endtask // do_monitor
 
   virtual function void report_phase(uvm_phase phase);
@@ -76,15 +86,7 @@ class i32_monitor extends uvm_monitor;
   virtual protected task transact();
     i32_item item = i32_item::type_id::create("item",this);     
     item.m_inst = m_decoder.decode_inst32(m_vi.curr_inst);
-
-    //race condition possible here since this transact() 
-    //proc is run off same clock edge as reg_fetcher's regfile monitor    
-    //TODO: layer this in a more elegant way.  instruction monitor feeds
-    //into a higher level monitor that adds on the register values to the item 
-    //perhaps
-    #0  //yield to the regfile monitor to update its values...  
     m_reg_fetcher.fetch_regs(item.m_inst);  //associate the reg values w/ instruction
-
     item.m_addr = m_vi.curr_pc;
     item.m_inst_bits = m_vi.curr_inst;    
     m_item = item;    

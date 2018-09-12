@@ -190,7 +190,7 @@ module i32_agent_unit_test;
     //toggle interface
     my_if.curr_pc = pc_insts[0][0];
     my_if.curr_inst = pc_insts[0][1];
-    regfile_if.x[1] = 0;    //gpr x[1] val
+    regfile_if.x[1] = -1;    //gpr x[1] val
     regfile_if.x[2] = 100;  //gpr x[2] val
    
     toggle_clock();
@@ -216,13 +216,13 @@ module i32_agent_unit_test;
       `FAIL_UNLESS(i32.m_addr == pc_insts[i][0]);
       `FAIL_UNLESS(i32.m_inst_bits == pc_insts[i][1]);
       `FAIL_UNLESS(i32.m_inst.m_inst == pc_insts[i][1]);
-//      if (l_inst32.has_rs1()) begin        
-//        if( l_inst32.get_rs1() == 1) begin
-//          `FAIL_UNLESS(l_inst32.get_rs1_val() === i);
-//        end else if( l_inst32.get_rs1() == 2) begin
-//          `FAIL_UNLESS(l_inst32.get_rs1_val() === i+100);
-//        end
-//      end
+      if (l_inst32.has_rs1()) begin        
+        if( l_inst32.get_rs1() == 1) begin
+          `FAIL_UNLESS(l_inst32.get_rs1_val() === i);
+        end else if( l_inst32.get_rs1() == 2) begin
+          `FAIL_UNLESS(l_inst32.get_rs1_val() === i+100);
+        end
+      end
       `FAIL_UNLESS(item_cnt == i+1);
       last_i32 = i32;
     end

@@ -69,7 +69,7 @@ class monitored_regfile extends regfile;
       foreach(m_vif.x[i]) begin
         if (m_x_regfile_array[i] !== m_vif.x[i]) begin
           m_x_regfile_array[i] = m_vif.x[i];
-          break;  //no need to keep looping
+          //do not break early, need to check all for changes
         end
       end
     end      
