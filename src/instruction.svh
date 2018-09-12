@@ -129,10 +129,7 @@ virtual class inst32;
     m_rs1_val = val;    
   endfunction   
 
-  //The has_rs1/2_val_set currently looks for X's but could have a flag
-  //instead that gets set via the set_rs1/2_val...
   virtual function bit has_rs1_val_set();
-    //return (m_rs1_val !== 'x);
     return m_rs1_val_set;
   endfunction
 
@@ -164,12 +161,8 @@ virtual class inst32;
     m_rs2_val = val;    
   endfunction   
 
-  //The has_rs1/2_val_set currently looks for X's but could have a flag
-  //instead that gets set via the set_rs1/2_val...
   virtual function bit has_rs2_val_set();
-    return (m_rs2_val !== 'x);
     return m_rs2_val_set;
-
   endfunction
 
   //Get the value of the x[rs2] as referenced by the rs2 field of the instruction
@@ -263,7 +256,7 @@ virtual class inst32;
       str={str, rs1.name(),", "};
       if (has_rs1_val_set()) begin
         //Check that rs val is set first since not all deployments will white box monitor the regfile values
-        rs_vals = $psprintf(" |  rf.%s = %0d",rs1,m_rs1_val);
+        rs_vals = $psprintf(" |  rf.%s = %0d",rs1.name(),m_rs1_val);
       end
     end
     if (has_rs2()) begin
@@ -271,7 +264,7 @@ virtual class inst32;
       str={str, rs2.name()," "};
       if (has_rs2_val_set()) begin
         //Check that rs val is set first since not all deployments will white box monitor the regfile values
-        rs_vals = $psprintf("%s, rf.%s = %0d",rs_vals, rs2,m_rs2_val);
+        rs_vals = $psprintf("%s, rf.%s = %0d",rs_vals, rs2.name(),m_rs2_val);
       end
     end
     if (has_imm()) begin

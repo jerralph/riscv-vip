@@ -118,7 +118,7 @@ module reg_fetcher_unit_test;
       regfile_if.x[31] = xlen_t'('hCCCC_CCCC);
       toggle_clock();
 
-      begin
+      begin        
         decoder decoder0 = new();
         opcode_t op = OP_IMM;   
         funct3_t funct3 = 0;   
@@ -126,6 +126,7 @@ module reg_fetcher_unit_test;
         xlen_t rs1_val;
         bit rs1_val_matches;
         string string_val;
+        bit string_match;
         
         addi.m_inst.i_inst.rs1 = 31;
         addi.m_inst.i_inst.rd  = 3;
@@ -134,10 +135,8 @@ module reg_fetcher_unit_test;
         //Print the instruction string.  This should include the rf.rs1/2 values
         string_val = addi.to_string(); 
         $display(string_val);
-        
-                //Print the instruction string.  This should include the rf.rs1/2 values
-        string_val = addi.to_string(); 
-        $display(string_val);
+        string_match = (string_val == "ffff8193 I ADDI X3_GP, X31_T6, -1 |  rf.X31_T6 = 3435973836");                
+        `FAIL_UNLESS(string_match)        
                 
         rs1_val = addi.get_rs1_val();
         rs1_val_matches = (rs1_val == 'hCCCC_CCCC);
@@ -178,12 +177,16 @@ module reg_fetcher_unit_test;
         bit rs1_val_matches;
         bit rs2_val_matches;
         string string_val;
+        bit string_match;
 
         uut.fetch_regs(add);
 
         //Print the instruction string.  This should include the rf.rs1/2 values
         string_val = add.to_string(); 
         $display(string_val);
+
+        string_match = (string_val == "00208fb3 R ADD X31_T6, X1_RA, X2_SP  |  rf.X1_RA = 1, rf.X2_SP = 2");                
+        `FAIL_UNLESS(string_match)        
 
 
         rs1_val = add.get_rs1_val();

@@ -24,7 +24,7 @@
 `ifndef _REGFILE_INCLUDED_
 `define _REGFILE_INCLUDED_
 
-class regfile;  
+class regfile;    
   
   protected x_regfile_array_t m_x_regfile_array;
   
