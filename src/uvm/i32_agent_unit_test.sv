@@ -92,9 +92,8 @@ module i32_agent_unit_test;
 
   //CSR and regfile stuff
   riscv_vip_regfile_if regfile_if(.*);
-  monitored_regfile my_regfile = new();
   riscv_vip_csr_if csr_if(.*);
-  monitored_csrs my_csrs = new();
+  monitored_csrs my_csrs = new();  //placeholder... 
 
 
   //===================================
@@ -122,7 +121,7 @@ module i32_agent_unit_test;
     svunit_ut.setup();
 
     my_csrs.set_m_vif(csr_if);
-    my_regfile.set_m_vif(regfile_if);    
+    //my_regfile.set_m_vif(regfile_if);    
 
 
     uvm_top.print_topology();
@@ -175,34 +174,58 @@ module i32_agent_unit_test;
 
   `SVTEST(some_insts)    
     i32_item i32, last_i32;
+    inst32 l_inst32;
     int item_cnt;
    
     const logic [31:0] pc_insts [][2] = '{
-	 {0,		  i_inst_t'{imm:99    ,rs1:2,   funct3:3,   rd:1, op:LOAD}},
-         {4,  	          i_inst_t'{imm:'hFF  ,rs1:1,   funct3:2,   rd:5, op:SYSTEM}},		
-         {8,         	  r_inst_t'{funct7:0, rs2:1, rs1:1, funct3:2, rd:2, op:OP}}
-                                          };
-    
+      {0, i_inst_t'{imm:99    ,rs1:2,   funct3:2,   rd:1, op:LOAD}},
+      {4, i_inst_t'{imm:'hFF  ,rs1:1,   funct3:2,   rd:5, op:SYSTEM}},		
+      {8, r_inst_t'{funct7:0, rs2:2, rs1:1, funct3:2, rd:2, op:OP}}
+    };
 
-       // Toggle interface pins and check that the ap gets the expected
-       foreach(pc_insts[i,]) begin
+    //X out everything
+    for(int i=1; i< 32; i++) begin
+      regfile_if.x[i] = 'x;
+    end
+    //toggle interface
+    my_if.curr_pc = pc_insts[0][0];
+    my_if.curr_inst = pc_insts[0][1];
+    regfile_if.x[1] = 0;    //gpr x[1] val
+    regfile_if.x[2] = 100;  //gpr x[2] val
+   
+    toggle_clock();
 
-         //toggle interface
-         my_if.curr_pc = pc_insts[i][0];
-         my_if.curr_inst = pc_insts[i][1];
-         toggle_clock();
 
-         //Check the ap
-         i32 = my_i32_agent_wrapper.m_item;
-         item_cnt = my_i32_agent_wrapper.m_write_cnt;         
-         i32.print();       
-         `FAIL_UNLESS(i32 != last_i32);    //ensure a fresh item is created by the monitor
-         `FAIL_UNLESS(i32.m_addr == pc_insts[i][0]);
-         `FAIL_UNLESS(i32.m_inst_bits == pc_insts[i][1]);
-         `FAIL_UNLESS(i32.m_inst.m_inst == pc_insts[i][1]);
-         `FAIL_UNLESS(item_cnt == i+1);
-         last_i32 = i32;         
-       end
+    // Toggle interface pins and check that the ap gets the expected
+    foreach(pc_insts[i,]) begin
+
+      //toggle interface
+      my_if.curr_pc = pc_insts[i][0];
+      my_if.curr_inst = pc_insts[i][1];
+      regfile_if.x[1] = i;      //gpr x[1] val
+      regfile_if.x[2] = 100+i;  //gpr x[2] val
+
+      toggle_clock();
+
+      //Check the ap
+      i32 = my_i32_agent_wrapper.m_item;
+      l_inst32 = i32.m_inst;
+      item_cnt = my_i32_agent_wrapper.m_write_cnt;
+      i32.print();
+      `FAIL_UNLESS(i32 != last_i32);    //ensure a fresh item is created by the monitor
+      `FAIL_UNLESS(i32.m_addr == pc_insts[i][0]);
+      `FAIL_UNLESS(i32.m_inst_bits == pc_insts[i][1]);
+      `FAIL_UNLESS(i32.m_inst.m_inst == pc_insts[i][1]);
+//      if (l_inst32.has_rs1()) begin        
+//        if( l_inst32.get_rs1() == 1) begin
+//          `FAIL_UNLESS(l_inst32.get_rs1_val() === i);
+//        end else if( l_inst32.get_rs1() == 2) begin
+//          `FAIL_UNLESS(l_inst32.get_rs1_val() === i+100);
+//        end
+//      end
+      `FAIL_UNLESS(item_cnt == i+1);
+      last_i32 = i32;
+    end
 
        repeat(5) toggle_clock();  //burn some cycles
        `FAIL_UNLESS(item_cnt == 3);    

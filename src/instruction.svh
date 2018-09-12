@@ -51,8 +51,11 @@ virtual class inst32;
   
   //Member fields for the values of the register pointed to by the rs1/2 fields.
   //These are only relevant for instructions that that have rs1 and/or rs2
-  xlen_t       m_rs1_val = 'x;
-  xlen_t       m_rs2_val = 'x;
+  protected xlen_t       m_rs1_val = 'x;
+  protected xlen_t       m_rs2_val = 'x;
+  
+  bit m_rs1_val_set = 0;
+  bit m_rs2_val_set = 0;
   
   covergroup inst_cg ();
     inst_cp : coverpoint m_inst_enum;
@@ -121,21 +124,31 @@ virtual class inst32;
   //This is generally the value of x[rs1] at the when the instruction in at the 
   //decode stage of the pipeline.  For data hazards the value may be different 
   virtual function void set_rs1_val(xlen_t val);
-    assert(has_rs1()) else $fatal(1);      
+    assert(has_rs1()) else $fatal(1);
+    m_rs1_val_set = 1;
     m_rs1_val = val;    
   endfunction   
+
+  //The has_rs1/2_val_set currently looks for X's but could have a flag
+  //instead that gets set via the set_rs1/2_val...
+  virtual function bit has_rs1_val_set();
+    //return (m_rs1_val !== 'x);
+    return m_rs1_val_set;
+  endfunction
 
   //Get the value of the x[rs1] as referenced by the rs1 field of the instruction
   //This is the value of x[rs1] from the reg file at decode stage and may be different than the 
   //x[rs1] in the case of data pipeline hazards - beware! 
   virtual function xlen_t get_rs1_val();
-    assert(has_rs1() && m_rs1_val !== 'x ) else $fatal(1);      
+    assert(has_rs1() && has_rs1_val_set() ) else $fatal(1);      
     return m_rs1_val;  
   endfunction   
       
   virtual function bit has_rs2();
     return (m_rvg_format inside {B,S,R});
   endfunction // has_rs2
+
+
 
   virtual function reg_id_t get_rs2();
     assert(has_rs2()) else $fatal(1);      
@@ -147,14 +160,23 @@ virtual class inst32;
   //decode stage of the pipeline.  For data hazards the value may be different 
   virtual function void set_rs2_val(xlen_t val);
     assert(has_rs2()) else $fatal(1);      
+    m_rs2_val_set = 1;
     m_rs2_val = val;    
   endfunction   
+
+  //The has_rs1/2_val_set currently looks for X's but could have a flag
+  //instead that gets set via the set_rs1/2_val...
+  virtual function bit has_rs2_val_set();
+    return (m_rs2_val !== 'x);
+    return m_rs2_val_set;
+
+  endfunction
 
   //Get the value of the x[rs2] as referenced by the rs2 field of the instruction
   //This is the value of x[rs2] from the reg file at decode stage and may be different than the 
   //x[rs2] in the case of data pipeline hazards - beware! 
   virtual function xlen_t get_rs2_val();
-    assert(has_rs2() && m_rs2_val !== 'x ) else $fatal(1);      
+    assert(has_rs2() && has_rs2_val_set() ) else $fatal(1);      
     return m_rs2_val;  
   endfunction   
 
@@ -224,10 +246,12 @@ virtual class inst32;
     string rvg_format_str = m_rvg_format.name();
     //string str = $psprintf("%032b %s ", m_inst, rvg_format_str);
     string str = $psprintf("%08H %s ", m_inst, rvg_format_str);
+    string rs_vals ="";
 
-    //Some of the below can be condensed with certian simulators, but
+    //Some of the below can be condensed with certain simulators, but
     //not with others... 
     reg_id_t rd, rs1, rs2;
+    xlen_t rs1_val, rs2_val;
     
     str={str,get_name_string()," "};
     if (has_rd())  begin
@@ -237,12 +261,25 @@ virtual class inst32;
     if (has_rs1()) begin
       rs1 = get_rs1();      
       str={str, rs1.name(),", "};
+      if (has_rs1_val_set()) begin
+        //Check that rs val is set first since not all deployments will white box monitor the regfile values
+        rs_vals = $psprintf(" |  rf.%s = %0d",rs1,m_rs1_val);
+      end
     end
     if (has_rs2()) begin
       rs2 = get_rs2();      
       str={str, rs2.name()," "};
+      if (has_rs2_val_set()) begin
+        //Check that rs val is set first since not all deployments will white box monitor the regfile values
+        rs_vals = $psprintf("%s, rf.%s = %0d",rs_vals, rs2,m_rs2_val);
+      end
     end
-    if (has_imm()) str={str, get_imm_string()};
+    if (has_imm()) begin
+      str={str, get_imm_string()};
+    end
+    str = {str, rs_vals};
+    
+    
     return str;      
   endfunction // to_string
   

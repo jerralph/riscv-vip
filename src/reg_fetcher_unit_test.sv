@@ -125,11 +125,20 @@ module reg_fetcher_unit_test;
         inst32 addi = inst32_iformat::new_nonspecial_from_funct3_op_imm(decoder0,funct3,op,-1);
         xlen_t rs1_val;
         bit rs1_val_matches;
+        string string_val;
         
         addi.m_inst.i_inst.rs1 = 31;
         addi.m_inst.i_inst.rd  = 3;
         uut.fetch_regs(addi);
         
+        //Print the instruction string.  This should include the rf.rs1/2 values
+        string_val = addi.to_string(); 
+        $display(string_val);
+        
+                //Print the instruction string.  This should include the rf.rs1/2 values
+        string_val = addi.to_string(); 
+        $display(string_val);
+                
         rs1_val = addi.get_rs1_val();
         rs1_val_matches = (rs1_val == 'hCCCC_CCCC);
         `FAIL_UNLESS_LOG( rs1_val_matches, $psprintf("rsq val 0x%h != 0xCCCCCCCC",rs1_val))
@@ -168,9 +177,15 @@ module reg_fetcher_unit_test;
         xlen_t rs2_val;
         bit rs1_val_matches;
         bit rs2_val_matches;
+        string string_val;
 
         uut.fetch_regs(add);
-        
+
+        //Print the instruction string.  This should include the rf.rs1/2 values
+        string_val = add.to_string(); 
+        $display(string_val);
+
+
         rs1_val = add.get_rs1_val();
         rs1_val_matches = (rs1_val == 'h1);
         `FAIL_UNLESS_LOG( rs1_val_matches, $psprintf("rs1 val 0x%h != 0x1",rs1_val))

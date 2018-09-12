@@ -29,8 +29,9 @@ class i32_monitor extends uvm_monitor;
 
   const static string         TRACKER_FN = "riscv_tracker_%0d.log";
   int                         m_core_id = -1;    
-  virtual riscv_vip_inst_if        m_vi;
-  decoder                     m_decoder;
+  virtual riscv_vip_inst_if   m_vi;
+  decoder                     m_decoder;  
+  reg_fetcher                 m_reg_fetcher;
   int                         m_tracker_file;
   logic [31:0]                m_last_pc = 'hFFFFFFFE;  
   i32_item                    m_item;
@@ -48,6 +49,7 @@ class i32_monitor extends uvm_monitor;
   virtual function void build_phase(uvm_phase phase);
     super.build_phase(phase);
     m_decoder = new();
+    m_reg_fetcher = new();
     init_tracker();    
   endfunction
   
@@ -61,7 +63,7 @@ class i32_monitor extends uvm_monitor;
 
     @(negedge m_vi.rstn);
     forever begin
-      @(posedge m_vi.clk && m_vi.curr_pc !== m_last_pc);        
+      @(posedge m_vi.clk && m_vi.curr_pc !== m_last_pc);
       transact();
       m_last_pc = m_vi.curr_pc;      
     end      
@@ -71,15 +73,24 @@ class i32_monitor extends uvm_monitor;
     end_tracker();    
   endfunction
 
-  virtual protected function void transact();
+  virtual protected task transact();
     i32_item item = i32_item::type_id::create("item",this);     
     item.m_inst = m_decoder.decode_inst32(m_vi.curr_inst);
+
+    //race condition possible here since this transact() 
+    //proc is run off same clock edge as reg_fetcher's regfile monitor    
+    //TODO: layer this in a more elegant way.  instruction monitor feeds
+    //into a higher level monitor that adds on the register values to the item 
+    //perhaps
+    #0  //yield to the regfile monitor to update its values...  
+    m_reg_fetcher.fetch_regs(item.m_inst);  //associate the reg values w/ instruction
+
     item.m_addr = m_vi.curr_pc;
     item.m_inst_bits = m_vi.curr_inst;    
     m_item = item;    
     track_item();
     m_ap.write(item); 
-  endfunction // transact
+  endtask // transact
 
 
    virtual function void init_tracker();

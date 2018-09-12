@@ -31,6 +31,7 @@ class i32_agent extends uvm_agent;
   i32_monitor m_monitor;
   virtual riscv_vip_inst_if m_vi;
   virtual riscv_vip_regfile_if m_rf_vi;
+  monitored_regfile m_rf;  //this is not a proper UVM monitor... whitebox... kind of hacked in for now
   int    m_core_id = -1;    
 
   uvm_analysis_port #(i32_item) m_mon_ap;
@@ -40,7 +41,8 @@ class i32_agent extends uvm_agent;
 
   function new(string name, uvm_component parent);
     super.new(name,parent);
-    m_mon_ap = new("m_mon_ap", this);        
+    m_mon_ap = new("m_mon_ap", this); 
+    m_rf = new();
   endfunction // new
 
   virtual function void build_phase(uvm_phase phase);
@@ -51,17 +53,27 @@ class i32_agent extends uvm_agent;
     has_vi = uvm_config_db#(virtual riscv_vip_inst_if)::get(this, "", "m_vi", m_vi);
     has_rf_vi = uvm_config_db#(virtual riscv_vip_regfile_if)::get(this, "", "m_rf_vi", m_rf_vi);
     has_core_id = uvm_config_db#(int)::get(this, "", "m_core_id", m_core_id);
-    `uvm_info("i32_agent"," build_phase() called",UVM_HIGH);
+    `uvm_info("i32_agent"," build_phase() called",UVM_LOW);
     m_monitor = i32_monitor::type_id::create("m_monitor",this);    
     assert(has_vi && has_rf_vi && has_core_id) else `uvm_fatal("has_vi && has_rf_vi && has_core_id","m_vi, m_rf_vi, or m_core_id not in config_db");    
     m_monitor.m_core_id = m_core_id;        
     m_monitor.m_vi = m_vi;
+    m_rf.set_m_vif(m_rf_vi);
   endfunction // build_phase
 
   virtual function void connect_phase(uvm_phase phase);
     assert(m_mon_ap) else $fatal("missing m_mon_ap");    
     m_monitor.m_ap.connect(m_mon_ap);
+    m_monitor.m_reg_fetcher.set_m_regfile(m_rf);
   endfunction // connect_phase
+
+  virtual task run_phase(uvm_phase phase);
+    `uvm_info("i32_agent"," run_phase() called",UVM_LOW);
+    m_rf.run_monitor();
+  endtask // run_phase
+
+
+
 endclass  
 
   
