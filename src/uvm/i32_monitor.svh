@@ -68,12 +68,12 @@ class i32_monitor extends uvm_monitor;
     //grabbing register file values for decoded instruction
     fork
       forever begin
-        @(posedge m_vi.clk && m_vi.curr_pc !== m_last_pc);
+        @(posedge m_vi.clk iff m_vi.curr_pc !== m_last_pc);
         ->do_trasact_e;
         m_last_pc = m_vi.curr_pc;      
       end 
       forever begin
-        wait( do_trasact_e );
+        @( do_trasact_e );
         transact();
       end
     join_none
@@ -83,7 +83,7 @@ class i32_monitor extends uvm_monitor;
     end_tracker();    
   endfunction
 
-  virtual protected task transact();
+  virtual protected function void transact();
     i32_item item = i32_item::type_id::create("item",this);     
     item.m_inst = m_decoder.decode_inst32(m_vi.curr_inst);
     m_reg_fetcher.fetch_regs(item.m_inst);  //associate the reg values w/ instruction
@@ -92,7 +92,7 @@ class i32_monitor extends uvm_monitor;
     m_item = item;    
     track_item();
     m_ap.write(item); 
-  endtask // transact
+  endfunction // transact
 
 
    virtual function void init_tracker();

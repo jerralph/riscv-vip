@@ -197,10 +197,15 @@ module reg_fetcher_unit_test;
         rs2_val_matches = (rs2_val == 'h2);
         `FAIL_UNLESS_LOG( rs2_val_matches, $psprintf("rs2 val 0x%h != 0x2",rs2_val))
 
+        regfile_if.x[1] = xlen_t'('hBB);
         regfile_if.x[2] = xlen_t'('hCC);
         toggle_clock();
 
         uut.fetch_regs(add);
+
+        rs1_val = add.get_rs1_val();
+        rs1_val_matches = (rs1_val == 'hBB);
+        `FAIL_UNLESS_LOG( rs1_val_matches, $psprintf("rs1 val 0x%h != 0xBB",rs1_val))
 
         rs2_val = add.get_rs2_val();
         rs2_val_matches = (rs2_val == 'hCC);

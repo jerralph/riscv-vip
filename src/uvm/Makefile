@@ -32,10 +32,10 @@ endif
 
 
 agent_ut:
-	runSVUnit -uvm -t i32_agent_unit_test.sv -s $(SIMR) -f riscv_vip_uvc.f
+	runSVUnit -uvm -t i32_agent_unit_test.sv -s $(SIMR) -f riscv_vip_uvc.f $(SIMR_ARGS)
 
 env_ut:
-	runSVUnit -uvm -t uvc_env_unit_test.sv -s $(SIMR) -f riscv_vip_uvc.f
+	runSVUnit -uvm -t uvc_env_unit_test.sv -s $(SIMR) -f riscv_vip_uvc.f $(SIMR_ARGS)
 
 clean:
 	rm -Rf work/*

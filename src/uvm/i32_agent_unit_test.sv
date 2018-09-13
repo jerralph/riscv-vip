@@ -183,19 +183,6 @@ module i32_agent_unit_test;
       {8, r_inst_t'{funct7:0, rs2:2, rs1:1, funct3:2, rd:2, op:OP}}
     };
 
-    //X out everything
-    for(int i=1; i< 32; i++) begin
-      regfile_if.x[i] = 'x;
-    end
-    //toggle interface
-    my_if.curr_pc = pc_insts[0][0];
-    my_if.curr_inst = pc_insts[0][1];
-    regfile_if.x[1] = -1;    //gpr x[1] val
-    regfile_if.x[2] = 100;  //gpr x[2] val
-   
-    toggle_clock();
-
-
     // Toggle interface pins and check that the ap gets the expected
     foreach(pc_insts[i,]) begin
 
@@ -218,7 +205,7 @@ module i32_agent_unit_test;
       `FAIL_UNLESS(i32.m_inst.m_inst == pc_insts[i][1]);
       if (l_inst32.has_rs1()) begin        
         if( l_inst32.get_rs1() == 1) begin
-          `FAIL_UNLESS(l_inst32.get_rs1_val() === i);
+          `FAIL_UNLESS_LOG(l_inst32.get_rs1_val() === i, $psprintf("i is %0d",i));
         end else if( l_inst32.get_rs1() == 2) begin
           `FAIL_UNLESS(l_inst32.get_rs1_val() === i+100);
         end
