@@ -35,7 +35,7 @@ Get riscv-vip
    $ cd riscv-vip
 ```
 
-Poke around the code and docs.
+Poke around the code and [docs](https://jerralph.github.io/riscv-vip/doc/index.html).
 
 
 Run a unit test
@@ -55,5 +55,5 @@ Run a unit test
 ```
 Integrate into your verification environment
 -----------------------------------
-See the Users' Guide for information on how to integrate into your own verification environment. 
+See the [Users' Guide](https://jerralph.github.io/riscv-vip/doc/index.html) for information on how to integrate into your own verification environment. 
 
