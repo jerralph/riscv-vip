@@ -71,7 +71,7 @@ module riscv_vip_base_test_unit_test;
 
   logic clk;
   logic rstn; 
-  riscv_vip_if my_if(.*);
+  riscv_vip_inst_if my_if(.*);
    
 
    
@@ -84,7 +84,7 @@ module riscv_vip_base_test_unit_test;
     my_test = riscv_vip_base_test_wrapper::type_id::create("my_test", null);
 
     
-    uvm_config_db#(virtual riscv_vip_if)::set(
+    uvm_config_db#(virtual riscv_vip_inst_if)::set(
       my_test,
       "m_uvc_env.m_i32_agent[0]",
       "m_vi",

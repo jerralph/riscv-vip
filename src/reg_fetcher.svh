@@ -1,4 +1,6 @@
 
+
+
 //###############################################################
 //
 //  Licensed to the Apache Software Foundation (ASF) under one
@@ -20,29 +22,32 @@
 //
 //###############################################################
 
+`ifndef _REG_FETCHER_INCLUDED_
+`define _REG_FETCHER_INCLUDED_
 
-`ifndef _RISCV_VIP_UVC_PKG_SV_
-`define _RISCV_VIP_UVC_PKG_SV_
+// This fetches the general purpose reg values for a given instruction 
+// from the regfile
+class reg_fetcher;  
 
-`include "riscv_vip_inst_if.sv"
-`include "riscv_vip_regfile_if.sv"
-`include "riscv_vip_csr_if.sv"
+  protected  regfile m_regfile; 
 
-package riscv_vip_uvc_pkg;
+  virtual function void set_m_regfile(regfile rf);
+    this.m_regfile = rf;
+  endfunction : set_m_regfile  
 
-  import uvm_pkg::*;
-  `include "uvm_macros.svh"
+  virtual function void fetch_regs(inst32 i32);
+    if (i32.has_rs1()) begin
+      i32.set_rs1_val(m_regfile.get_x(i32.get_rs1()));      
+    end 
+    if (i32.has_rs2()) begin
+      i32.set_rs2_val(m_regfile.get_x(i32.get_rs2()));
+    end
 
-  import riscv_vip_pkg::*;
-  import riscv_vip_class_pkg::*;
+  endfunction
 
-  `include "i32_item.svh"
-  `include "i32_monitor.svh"
-  `include "i32_agent.svh"
-  `include "i32_cov_subscriber.svh"
-  `include "uvc_env.svh"
-   
-endpackage
+endclass 
 
 `endif
+ 
+
 

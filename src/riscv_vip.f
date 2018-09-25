@@ -20,7 +20,8 @@
 //
 //###############################################################
 
-
+riscv_vip_csr_if.sv
+riscv_vip_regfile_if.sv
 riscv_vip_pkg.sv
 riscv_vip_class_pkg.sv
 

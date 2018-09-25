@@ -42,6 +42,10 @@ package riscv_vip_class_pkg;
      
   `include "instruction.svh"
   `include "decoder.svh"
+  `include "regfile.svh"
+  `include "reg_fetcher.svh"
+  `include "csrs.svh"
+  `include "pipeline.svh"
   `include "hex_file_analyzer.svh"
    
 endpackage 

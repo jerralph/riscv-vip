@@ -75,7 +75,7 @@ function void uvc_env::build_phase(uvm_phase phase);
     //RISCV_VIP
     begin
       string i32_name = $psprintf("m_i32_agent[%0d]",i);      
-      if(uvm_config_db#(virtual riscv_vip_if)::exists(this, i32_name, "m_vi")) begin
+      if(uvm_config_db#(virtual riscv_vip_inst_if)::exists(this, i32_name, "m_vi")) begin
         m_i32_agent[i] = i32_agent::type_id::create(i32_name,this);
         `uvm_info("UVC_ENV", $sformatf("At Path: %s - Build Phase: Created i32 interface instance",get_full_name()), UVM_NONE)
       end else begin

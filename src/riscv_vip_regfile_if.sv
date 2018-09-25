@@ -21,28 +21,26 @@
 //###############################################################
 
 
-`ifndef _RISCV_VIP_UVC_PKG_SV_
-`define _RISCV_VIP_UVC_PKG_SV_
+`ifndef _RISCV_VIP_REGFILE_IF_INCLUDED_
+`define _RISCV_VIP_REGFILE_IF_INCLUDED_
 
-`include "riscv_vip_inst_if.sv"
-`include "riscv_vip_regfile_if.sv"
-`include "riscv_vip_csr_if.sv"
+import riscv_vip_pkg::*;
 
-package riscv_vip_uvc_pkg;
+/* This is a white box interface into the values of the register file.  Making this
+ * more transactional to use a rd/wr type memory i/f was considered but
+ * different risc-v implementations may do it differently.  Some may not even use
+ * a regifile but simply use flip flops. The most flexible and simplist route for 
+ * now is to go with the raw values of the register values.  At some point there
+ * may be a need for a strobe or something to know when a given register is 
+ * read or written.
+ */
+interface riscv_vip_regfile_if (input clk, input rstn);
 
-  import uvm_pkg::*;
-  `include "uvm_macros.svh"
-
-  import riscv_vip_pkg::*;
-  import riscv_vip_class_pkg::*;
-
-  `include "i32_item.svh"
-  `include "i32_monitor.svh"
-  `include "i32_agent.svh"
-  `include "i32_cov_subscriber.svh"
-  `include "uvc_env.svh"
+  //NOTE regfile is 1-31 and index 0 is not included since it's always zero
+   riscv_vip_pkg::x_regfile_array_t x;
    
-endpackage
+endinterface
 
 `endif
+
 

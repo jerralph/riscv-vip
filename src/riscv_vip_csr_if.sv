@@ -22,12 +22,15 @@
 //###############################################################
 
 
-`ifndef _RISCV_VIP_IF_INCLUDED_
-`define _RISCV_VIP_IF_INCLUDED_
+`ifndef _RISCV_VIP_CSR_IF_INCLUDED_
+`define _RISCV_VIP_CSR_IF_INCLUDED_
 
-interface riscv_vip_if (input clk, input rstn);
-   logic[31:0] curr_pc;
-   logic [31:0] curr_inst;   
+`include "riscv_vip_pkg.sv"
+
+interface riscv_vip_csr_if (input clk, input rstn);
+
+  riscv_vip_pkg::csrs_t csrs;
+   
 endinterface
 
 `endif

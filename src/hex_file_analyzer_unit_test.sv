@@ -9,6 +9,19 @@ module hex_file_analyzer_unit_test;
   svunit_testcase svunit_ut;
 
 
+  //simulator for some reason doesn't like a null virtual interfaces is classes at inital runtime.
+  //this solves this...
+  //regfile interface
+  logic clk;
+  logic rstn; 
+
+  riscv_vip_regfile_if regfile_if(.*);
+  monitored_regfile my_regfile = new();
+  //CSR interface
+  riscv_vip_csr_if csr_if(.*);
+  monitored_csrs my_csrs = new();
+
+
   //===================================
   // This is the UUT that we're 
   // running the Unit Tests on
@@ -32,6 +45,8 @@ module hex_file_analyzer_unit_test;
   task setup();
     svunit_ut.setup();
     /* Place Setup Code Here */
+    my_csrs.set_m_vif(csr_if);
+    my_regfile.set_m_vif(regfile_if);    
 
   endtask
 

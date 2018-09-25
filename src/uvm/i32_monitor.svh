@@ -29,8 +29,9 @@ class i32_monitor extends uvm_monitor;
 
   const static string         TRACKER_FN = "riscv_tracker_%0d.log";
   int                         m_core_id = -1;    
-  virtual riscv_vip_if        m_vi;
-  decoder                     m_decoder;
+  virtual riscv_vip_inst_if   m_vi;
+  decoder                     m_decoder;  
+  reg_fetcher                 m_reg_fetcher;
   int                         m_tracker_file;
   logic [31:0]                m_last_pc = 'hFFFFFFFE;  
   i32_item                    m_item;
@@ -48,6 +49,7 @@ class i32_monitor extends uvm_monitor;
   virtual function void build_phase(uvm_phase phase);
     super.build_phase(phase);
     m_decoder = new();
+    m_reg_fetcher = new();
     init_tracker();    
   endfunction
   
@@ -58,13 +60,23 @@ class i32_monitor extends uvm_monitor;
   endtask // run_phase
 
   virtual protected task do_monitor();
-
+    event  do_trasact_e;
+    
     @(negedge m_vi.rstn);
-    forever begin
-      @(posedge m_vi.clk && m_vi.curr_pc !== m_last_pc);        
-      transact();
-      m_last_pc = m_vi.curr_pc;      
-    end      
+    //Two processes synced with an event to overcome race possibility
+    //between posedge clk for i32_monitor and monitored_regfile in
+    //grabbing register file values for decoded instruction
+    fork
+      forever begin
+        @(posedge m_vi.clk iff m_vi.curr_pc !== m_last_pc);
+        ->do_trasact_e;
+        m_last_pc = m_vi.curr_pc;      
+      end 
+      forever begin
+        @( do_trasact_e );
+        transact();
+      end
+    join_none
   endtask // do_monitor
 
   virtual function void report_phase(uvm_phase phase);
@@ -74,6 +86,11 @@ class i32_monitor extends uvm_monitor;
   virtual protected function void transact();
     i32_item item = i32_item::type_id::create("item",this);     
     item.m_inst = m_decoder.decode_inst32(m_vi.curr_inst);
+    
+    if( item.m_inst != null ) begin
+      m_reg_fetcher.fetch_regs(item.m_inst);  //associate the reg values w/ instruction
+    end
+      
     item.m_addr = m_vi.curr_pc;
     item.m_inst_bits = m_vi.curr_inst;    
     m_item = item;    
@@ -98,7 +115,7 @@ class i32_monitor extends uvm_monitor;
      inst_str = (m_item.m_inst) ? 
                 m_item.m_inst.to_string() :
                 $psprintf("%08H unknown",m_item.m_inst_bits);     
-     $fdisplay(m_tracker_file, $psprintf("%08H %s", m_item.m_addr, inst_str));
+     $fdisplay(m_tracker_file, $psprintf("%0t %08H %s", $time, m_item.m_addr, inst_str));
    endfunction
 
 endclass 

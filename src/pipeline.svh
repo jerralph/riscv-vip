@@ -20,29 +20,14 @@
 //
 //###############################################################
 
+`ifndef _PIPELINE_INCLUDED_
+`define _PIPELINE_INCLUDED_
 
-`ifndef _RISCV_VIP_UVC_PKG_SV_
-`define _RISCV_VIP_UVC_PKG_SV_
+class pipeline#(int DEPTH = 5);  
+  
+  inst32 m_inst_fifo [$:DEPTH];
 
-`include "riscv_vip_inst_if.sv"
-`include "riscv_vip_regfile_if.sv"
-`include "riscv_vip_csr_if.sv"
 
-package riscv_vip_uvc_pkg;
-
-  import uvm_pkg::*;
-  `include "uvm_macros.svh"
-
-  import riscv_vip_pkg::*;
-  import riscv_vip_class_pkg::*;
-
-  `include "i32_item.svh"
-  `include "i32_monitor.svh"
-  `include "i32_agent.svh"
-  `include "i32_cov_subscriber.svh"
-  `include "uvc_env.svh"
-   
-endpackage
-
+endclass 
+ 
 `endif
-

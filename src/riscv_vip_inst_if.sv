@@ -1,4 +1,5 @@
 
+
 //###############################################################
 //
 //  Licensed to the Apache Software Foundation (ASF) under one
@@ -21,28 +22,14 @@
 //###############################################################
 
 
-`ifndef _RISCV_VIP_UVC_PKG_SV_
-`define _RISCV_VIP_UVC_PKG_SV_
+`ifndef _RISCV_VIP_INST_IF_INCLUDED_
+`define _RISCV_VIP_INST_IF_INCLUDED_
 
-`include "riscv_vip_inst_if.sv"
-`include "riscv_vip_regfile_if.sv"
-`include "riscv_vip_csr_if.sv"
-
-package riscv_vip_uvc_pkg;
-
-  import uvm_pkg::*;
-  `include "uvm_macros.svh"
-
-  import riscv_vip_pkg::*;
-  import riscv_vip_class_pkg::*;
-
-  `include "i32_item.svh"
-  `include "i32_monitor.svh"
-  `include "i32_agent.svh"
-  `include "i32_cov_subscriber.svh"
-  `include "uvc_env.svh"
+interface riscv_vip_inst_if (input clk, input rstn);
    
-endpackage
+   logic [31:0]  curr_pc;
+   logic [31:0] curr_inst;
+   
+endinterface
 
 `endif
-

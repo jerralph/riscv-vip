@@ -34,6 +34,19 @@ module inst32_unit_test;
   svunit_testcase svunit_ut;
 
 
+  //simulator for some reason doesn't like a null virtual interfaces is classes at inital runtime.
+  //this solves this...
+  //regfile interface
+  logic clk;
+  logic rstn; 
+
+  riscv_vip_regfile_if regfile_if(.*);
+  monitored_regfile my_regfile = new();
+  //CSR interface
+  riscv_vip_csr_if csr_if(.*);
+  monitored_csrs my_csrs = new();
+
+
   //===================================
   // This is the UUT that we're 
   // running the Unit Tests on
@@ -58,7 +71,11 @@ module inst32_unit_test;
   //===================================
   task setup();
     svunit_ut.setup();
+
+
     /* Place Setup Code Here */
+    my_csrs.set_m_vif(csr_if);
+    my_regfile.set_m_vif(regfile_if);    
 
   endtask
 
@@ -93,7 +110,7 @@ module inst32_unit_test;
        decoder decoder0 = new();
        opcode_t op = OP_IMM;   
        funct3_t funct3 = 0;   
-       inst32 addi = inst32_iformat::new_nonspecial_from_op_funct3_imm(decoder0,funct3,op,-1);
+       inst32 addi = inst32_iformat::new_nonspecial_from_funct3_op_imm(decoder0,funct3,op,-1);
        addi.m_inst.i_inst.rs1 = 1;
        addi.m_inst.i_inst.rd  = 3;       
        $display("My addi from code is [ %s ]", addi.to_string());      
@@ -308,7 +325,7 @@ module inst32_unit_test;
         test_i_ns_imm(f3,op,  NS_MAX_POS, exp_cov); //imm of   max pos, 7/7 bins hit  
       
         begin   
-          inst32_iformat i32i = inst32_iformat::new_nonspecial_from_op_funct3_imm(
+          inst32_iformat i32i = inst32_iformat::new_nonspecial_from_funct3_op_imm(
             my_decoder,
             f3,
             op, 
@@ -485,7 +502,7 @@ module inst32_unit_test;
     imm_low_t gotten_imm; 
     real cov;
 
-    i32i = inst32_iformat::new_nonspecial_from_op_funct3_imm(my_decoder,f3,op,imm);    
+    i32i = inst32_iformat::new_nonspecial_from_funct3_op_imm(my_decoder,f3,op,imm);    
 
     gotten_imm = i32i.get_imm();    
     `FAIL_UNLESS_LOG(gotten_imm == imm, $psprintf("gotten_imm = %d, exp imm=%d", gotten_imm, imm));   
