@@ -24,7 +24,7 @@ About
 ----------------------------
 This repository hosts RISC-V related SystemVerilog Verification IP.
 
-See the riscv-vip users' guide for important user details.  https://jerralph.github.io/riscv-vip/doc/index.html 
+See the riscv-vip users' guide for important user details.  The users' guide source is in the doc/ directory and is browser viewable at https://jerralph.github.io/riscv-vip/doc/index.html 
 
 Find the release notes in the RELEASE.txt file.
 
