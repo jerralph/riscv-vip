@@ -61,7 +61,7 @@ class i32_monitor extends uvm_monitor;
 
   virtual protected task do_monitor();
     event  do_trasact_e;
-
+    
     @(negedge m_vi.rstn);
     //Two processes synced with an event to overcome race possibility
     //between posedge clk for i32_monitor and monitored_regfile in
@@ -86,7 +86,11 @@ class i32_monitor extends uvm_monitor;
   virtual protected function void transact();
     i32_item item = i32_item::type_id::create("item",this);     
     item.m_inst = m_decoder.decode_inst32(m_vi.curr_inst);
-    m_reg_fetcher.fetch_regs(item.m_inst);  //associate the reg values w/ instruction
+    
+    if( item.m_inst != null ) begin
+      m_reg_fetcher.fetch_regs(item.m_inst);  //associate the reg values w/ instruction
+    end
+      
     item.m_addr = m_vi.curr_pc;
     item.m_inst_bits = m_vi.curr_inst;    
     m_item = item;    
@@ -111,7 +115,7 @@ class i32_monitor extends uvm_monitor;
      inst_str = (m_item.m_inst) ? 
                 m_item.m_inst.to_string() :
                 $psprintf("%08H unknown",m_item.m_inst_bits);     
-     $fdisplay(m_tracker_file, $psprintf("%08H %s", m_item.m_addr, inst_str));
+     $fdisplay(m_tracker_file, $psprintf("%0t %08H %s", $time, m_item.m_addr, inst_str));
    endfunction
 
 endclass 

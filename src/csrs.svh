@@ -69,7 +69,7 @@ class monitored_csrs extends csrs;
   virtual protected task do_monitor();
     @(negedge m_vif.rstn);
     forever begin
-      @(posedge m_vif.clk && m_vif.csrs !== m_csrs);        
+      @(posedge m_vif.clk iff ( m_vif.csrs !== m_csrs));        
       m_csrs = m_vif.csrs;      
     end      
   endtask // do_monitor
