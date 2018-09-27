@@ -1,5 +1,3 @@
-
-
 //###############################################################
 //
 //  Licensed to the Apache Software Foundation (ASF) under one
@@ -21,36 +19,17 @@
 //
 //###############################################################
 
-`ifndef _RISCV_VIP_CLASS_PKG_SV_
-`define _RISCV_VIP_CLASS_PKG_SV_
+//Some macros to limit duplicate code in creating coverage bins
+`define IMM_MAX_POS(x)  {1'b0,{($bits(x)-1){1'b1}}}
+`define IMM_ALL_ONES(x) {$bits(x){1'b1}}
+`define IMM_MIN_NEG(x)  {1'b1,{($bits(x)-1){1'b0}}}
 
-package riscv_vip_class_pkg;     
-
-  import riscv_vip_pkg::*;   
- `include "riscv_vip_defines.svh"
-
-
-  //Forward class definitions
-  typedef class decoder;   
-  typedef class inst16;
-  typedef class inst16_ciformat;  
-  typedef class inst32;
-  typedef class inst32_rformat;
-  typedef class inst32_iformat;
-  typedef class inst32_sformat;
-  typedef class inst32_bformat;
-  typedef class inst32_uformat;         
-  typedef class inst32_jformat;         
-     
-  `include "instruction.svh"
-  `include "decoder.svh"
-  `include "regfile.svh"
-  `include "reg_fetcher.svh"
-  `include "csrs.svh"
-  `include "pipeline.svh"
-  `include "hex_file_analyzer.svh"
-   
-endpackage 
-
-`endif 
-
+//Some defines to reduce duplicate code for a work around 
+//wrt simulator support for set_covergroup_expression 
+//(IEEE 1800-2012, 19.5.1.2)
+`define S_INSTS_LIST            SB,SH,SW
+`define I_NONSPECIAL_INSTS_LIST JALR,LB,LH,LW,LBU,LHU,ADDI,SLTI,SLTIU,XORI,ANDI
+`define I_SHAMT_INSTS_LIST      SLLI, SRLI, SRAI
+`define B_INSTS_LIST            BEQ, BNE, BLT, BGE, BLTU, BGEU
+`define U_INSTS_LIST            LUI,AUIPC
+`define J_INSTS_LIST            JAL

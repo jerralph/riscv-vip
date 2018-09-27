@@ -28,7 +28,10 @@
 `define _RISCV_VIP_PKG_SV_
 
 package riscv_vip_pkg;     
-   
+
+ `include "riscv_vip_defines.svh"
+
+
   //Instruction bit width parameters.
   //based off Table 19.2 of Waterman and Asnovic 2017
   //Fig 2.3, in Patterson and Waterman, RISC-V reader
@@ -269,10 +272,10 @@ package riscv_vip_pkg;
   };
 
   //List of all U format instructions
-  inst_enum_t U_INSTS[] = '{LUI,AUIPC}; 
+  inst_enum_t U_INSTS[] = '{`U_INSTS_LIST}; 
 
   //List of all J format instructions
-  inst_enum_t J_INSTS[] = '{JAL};
+  inst_enum_t J_INSTS[] = '{`J_INSTS_LIST};
 
   //Lookup a inst_enum_t by inst opcode in bits [6:0]
   const inst_enum_t uj_inst_by_major[rvg_major_opcode_t] = '{
@@ -290,25 +293,14 @@ package riscv_vip_pkg;
   //imm field to differentiate 
   const bit [31-25:0] SRLI_IMM_31_25 = 7'b0000000;
   const bit [31-25:0] SRAI_IMM_31_25 = 7'b0100000;
-  const inst_enum_t I_SHAMT_INSTS[] = '{SLLI, SRLI, SRAI};
-  const inst_enum_t I_NONSPECIAL_INSTS[] = '{JALR, 
-                                            LB, 
-                                            LH, 
-                                            LW, 
-                                            LBU, 
-                                            LHU, 
-                                            ADDI, 
-                                            SLTI, 
-                                            SLTIU, 
-                                            XORI, 
-                                            ANDI
-                                            };
+  const inst_enum_t I_SHAMT_INSTS[] = '{`I_SHAMT_INSTS_LIST};
+  const inst_enum_t I_NONSPECIAL_INSTS[] = '{`I_NONSPECIAL_INSTS_LIST};
 
   //List of all S format instructions
-  const inst_enum_t S_INSTS[] = '{SB,SH,SW};
+  const inst_enum_t S_INSTS[] = '{`S_INSTS_LIST};
 
   //List of all B format instructions
-  const inst_enum_t B_INSTS[] = '{BEQ, BNE, BLT, BGE, BLTU, BGEU};
+  const inst_enum_t B_INSTS[] = '{`B_INSTS_LIST};
 
 
   //typedef for I,S,B format intructions, for looking up inst enum 
