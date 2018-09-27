@@ -23,12 +23,6 @@
 `ifndef _INSTRUCTION_INCLUDED_
 `define _INSTRUCTION_INCLUDED_
 
-//Some macros to limit duplicate code in creating coverage bins
-`define IMM_MAX_POS(x)  {1'b0,{($bits(x)-1){1'b1}}}
-`define IMM_ALL_ONES(x) {$bits(x){1'b1}}
-`define IMM_MIN_NEG(x)  {1'b1,{($bits(x)-1){1'b0}}}
- 
-
 virtual class inst16;
 endclass // inst16
 
@@ -327,7 +321,7 @@ class inst32_sformat extends inst32;
       bins min_neg =  {`IMM_MIN_NEG(imm)}; 
     }
     i32s_insts_cp : coverpoint inst {
-      bins s_insts[] = S_INSTS;
+      bins s_insts[] = {`S_INSTS_LIST};
     }
     i32s_inst_x_imm :cross i32s_insts_cp, i32s_imm_cp;
     //TODO VR to cross the value of the register with the offset...
@@ -501,10 +495,10 @@ class inst32_iformat extends inst32;
       bins max_legal     = {5'b01111};
     } 
     i32i_nonspecial_insts_cp : coverpoint inst {
-      bins i_nonspecial_insts[] = I_NONSPECIAL_INSTS;
+      bins i_nonspecial_insts[] = {`I_NONSPECIAL_INSTS_LIST};
     }
     i32i_shamt_insts_cp : coverpoint inst {
-      bins i_shamt_insts[] = I_SHAMT_INSTS;            
+      bins i_shamt_insts[] = {`I_SHAMT_INSTS_LIST};            
     }
     i32i_inst_x_imm :cross i32i_nonspecial_insts_cp, i32i_imm_cp;
     i32i_shamt_inst_x_shamt : cross i32i_shamt_insts_cp, i32i_shamt_cp;
@@ -616,7 +610,7 @@ class inst32_bformat extends inst32;
       bins min_neg =  {`IMM_MIN_NEG(imm)}; 
     }
     i32b_insts_cp : coverpoint inst {
-      bins b_insts[] = B_INSTS;
+      bins b_insts[] = {`B_INSTS_LIST};
     }
     i32b_inst_x_imm :cross i32b_insts_cp, i32b_imm_cp;
     //TODO VR to cross the value of the register with the offset...
@@ -693,7 +687,7 @@ class inst32_uformat extends inst32;
       bins min_neg =  {`IMM_MIN_NEG(imm)}; 
     }
     i32u_insts_cp : coverpoint inst {
-      bins u_insts[] = U_INSTS;
+      bins u_insts[] = {`U_INSTS_LIST};
     }
     i32u_inst_x_imm :cross i32u_insts_cp, i32u_imm_cp;
     //TODO VR for dest reg
@@ -763,7 +757,7 @@ class inst32_jformat extends inst32;
       bins min_neg =  {`IMM_MIN_NEG(imm)}; 
     }
     i32j_insts_cp : coverpoint inst {
-      bins j_insts[] = J_INSTS;
+      bins j_insts[] = {`J_INSTS_LIST};
     }
     i32j_uinst_x_imm :cross i32j_insts_cp, i32j_imm_cp;
     //TODO VR for dest reg

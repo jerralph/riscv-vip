@@ -62,7 +62,7 @@ class hex_file_analyzer;
     int unsigned file = $fopen(file_list_fn,"r");
     int fscan_result;
 
-    assert(file) else $fatal("bad file");
+    assert(file) else $fatal(-1, "bad file");
     m_decoder.m_strict = 0;  //Don't fatal on unsupported insts, get null instead
  
     while(!$feof(file)) begin        	
