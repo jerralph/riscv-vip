@@ -33,3 +33,9 @@
 `define B_INSTS_LIST            BEQ, BNE, BLT, BGE, BLTU, BGEU
 `define U_INSTS_LIST            LUI,AUIPC
 `define J_INSTS_LIST            JAL
+`define R_INSTS_LIST            ADD,SUB,SLL,SLT,SLTU,XOR,SRL,SRA,OR,AND
+`define INSTS_WITH_NO_RS_LIST   `U_INSTS_LIST,`J_INSTS_LIST,FENCE,ECALL,EBREAK,CSRRWI,CSRRSI,CSRRCI
+`define INSTS_W_RS2_LIST        `B_INSTS_LIST,`S_INSTS_LIST,`R_INSTS_LIST
+
+
+`define BREADCRUMB(msg) $display("%m %s line %0d %s",`__FILE__,`__LINE__, msg)

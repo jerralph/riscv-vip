@@ -165,6 +165,7 @@ package riscv_vip_pkg;
   } inst_t;
 
   
+
   //Below enum is derived from riscv-spec-v2.2.pdf p103
   //Map of major opcode for RiscV General (RVG)
   typedef enum opcode_t {                         
@@ -257,7 +258,8 @@ package riscv_vip_pkg;
 
   //Lookup a unique instruction enum for R format instructions,
   //keyed by {funct7_t,funct3_t,rvg_major_opcode_t}  
-  const inst_enum_t r_inst_by_funct7funct3major[bit[FUNCT7_W+FUNCT3_W+OPCODE_W-1:0]]  = '{
+  typedef  bit[FUNCT7_W+FUNCT3_W+OPCODE_W-1:0] funct7funct3op_t;   
+  const inst_enum_t r_inst_by_funct7funct3major[funct7funct3op_t]  = '{
     {7'b0000000,3'b000,OP} : ADD,
     {7'b0100000,3'b000,OP} : SUB,
     {7'b0000000,3'b001,OP} : SLL,
@@ -270,6 +272,16 @@ package riscv_vip_pkg;
     {7'b0000000,3'b111,OP} : AND,
     default                : UNKNOWN_INST                                       
   };
+
+  //reverse lookup of the above table to get the funct7, funct3, op of an instruction
+  //useful for unit testing, etc.
+  function automatic funct7funct3op_t funct7funct3op_from_r_inst(inst_enum_t inst);
+    funct7funct3op_t keys[$];
+    keys = r_inst_by_funct7funct3major.find_index with (item == inst);
+    assert(keys.size() == 1);
+    return keys[0];    
+  endfunction
+
 
   //List of all U format instructions
   inst_enum_t U_INSTS[] = '{`U_INSTS_LIST}; 

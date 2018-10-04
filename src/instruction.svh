@@ -37,6 +37,7 @@ endclass // inst16
  */
 virtual class inst32;
   
+  int unsigned cycle;  //The clock cycle associated with commit of the instruction
   rand inst_t  m_inst;
   rvg_format_t m_rvg_format  = UNKNOWN;
   inst_enum_t  m_inst_enum;
@@ -106,7 +107,7 @@ virtual class inst32;
   endfunction // get_rd
 
   virtual function bit has_rs1();
-    return (!(m_rvg_format inside {U,J}));
+    return (!(m_inst_enum inside {`INSTS_WITH_NO_RS_LIST}));
   endfunction // has_rs1
 
   virtual function reg_id_t get_rs1();
@@ -230,23 +231,24 @@ virtual class inst32;
   endfunction
   
   virtual function string to_string();
-    string rvg_format_str = m_rvg_format.name();
+    string rvg_format_str;
     //string str = $psprintf("%032b %s ", m_inst, rvg_format_str);
-    string str = $psprintf("%08H %s ", m_inst, rvg_format_str);
+    string str;
     string rs_vals ="";
-
-    //Some of the below can be condensed with certain simulators, but
-    //not with others... 
     reg_id_t rd, rs1, rs2;
     xlen_t rs1_val, rs2_val;
-    
+
+    rvg_format_str = m_rvg_format.name();
+    str = $psprintf("%08H %s ", m_inst, rvg_format_str);
+
     str={str,get_name_string()," "};
     if (has_rd())  begin
       rd = get_rd();      
       str={str, rd.name() ,", "};
     end
     if (has_rs1()) begin
-      rs1 = get_rs1();      
+      rs1 = get_rs1();
+
       str={str, rs1.name(),", "};
       if (has_rs1_val_set()) begin
         //Check that rs val is set first since not all deployments will white box monitor the regfile values
@@ -382,6 +384,38 @@ endclass
   
 class inst32_rformat extends inst32;
 
+  //Create an r type instruction object given the enum, and regs
+  static function inst32_rformat new_rformat(
+    decoder my_decoder,
+    inst_enum_t inst_enum, 
+    regsel_t rd, 
+    regsel_t rs1, 
+    regsel_t rs2
+    );
+    funct7funct3op_t f7f3o;
+    funct7_t f7;
+    funct3_t f3;
+    opcode_t op;
+    r_inst_t inst_bits;
+    inst32 i32;
+    inst32_rformat i32r;
+
+
+    f7f3o = funct7funct3op_from_r_inst(inst_enum);
+    {f7,f3,op} = f7f3o;
+    inst_bits.funct3 = f3;
+    inst_bits.funct7 = f7;
+    inst_bits.op = op;
+    inst_bits.rd = rd;
+    inst_bits.rs1 = rs1;
+    inst_bits.rs2 = rs2;
+    
+    i32 = my_decoder.decode_inst32(inst_bits);
+    $cast(i32r,i32);
+    return i32r;
+    
+  endfunction
+
   function new(inst_t inst);     
     super.new(inst);  
     m_rvg_format = R;      
@@ -412,7 +446,7 @@ endclass // inst32_rformat
  * Class for RV32 I format immediate instructions {JALR, LB, ..., ADDI, ...}
  *
  */    
-class inst32_iformat extends inst32;
+class inst32_iformat extends inst32;    
 
   //useful for unit testing
   static function inst32_iformat new_from_funct3_shamt_imm(

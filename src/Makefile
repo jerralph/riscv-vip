@@ -47,6 +47,10 @@ rf_ut:
 rfet_ut:
 	runSVUnit -t reg_fetcher_unit_test.sv -s $(SIMR) -f riscv_vip.f $(SIMR_ARGS)
 
+ihist_ut:
+	runSVUnit -t inst_history_unit_test.sv -s $(SIMR) -f riscv_vip.f $(SIMR_ARGS)
+
+
 
 cov:
 	vsim -viewcov riscv_vip.ucdb

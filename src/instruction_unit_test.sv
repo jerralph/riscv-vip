@@ -60,9 +60,7 @@ module inst32_unit_test;
   //===================================
   function void build();
     svunit_ut = new(name);
-
     my_decoder = new();     
-    //my_inst32  = new(/* New arguments if needed */);
   endfunction
 
 
@@ -113,7 +111,7 @@ module inst32_unit_test;
        inst32 addi = inst32_iformat::new_nonspecial_from_funct3_op_imm(decoder0,funct3,op,-1);
        addi.m_inst.i_inst.rs1 = 1;
        addi.m_inst.i_inst.rd  = 3;       
-       $display("My addi from code is [ %s ]", addi.to_string());      
+       //$display("My addi from code is [ %s ]", addi.to_string());      
     `SVTEST_END
 
     `SVTEST(ug_example2)
@@ -124,7 +122,7 @@ module inst32_unit_test;
        decoder decoder0 = new();
        bit[31:0] inst_bits = 32'hfff08193;    
        inst32 i32 = decoder0.decode_inst32(inst_bits);
-       $display("decode of 0x%0H is [ %s ]", inst_bits, i32.to_string());
+       //$display("decode of 0x%0H is [ %s ]", inst_bits, i32.to_string());
 
        begin     
         //Cast the general inst32 into the more specific inst32_iformat once we're sure it
@@ -393,9 +391,12 @@ module inst32_unit_test;
 
   `SVTEST(store_to_string)
      //Prove out a fix to the way store instructions are printed
-     inst32 i32 = my_decoder.decode_inst32(32'h0055a023);
-     string obs = i32.to_string();
-     string   expected = "0055a023 S SW X5_T0, 0(X11_A1)";   
+     inst32 i32;
+     string obs;
+     string expected = "0055a023 S SW X5_T0, 0(X11_A1)";
+     i32 = my_decoder.decode_inst32(32'h0055a023);
+     obs = i32.to_string();
+
      `FAIL_UNLESS_LOG(obs == expected  ,$psprintf("obs %s, expected %s",obs,expected))
 
      i32 = inst32_sformat::new_from_funct3_imm(my_decoder, 3'b001, -9);
