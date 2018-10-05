@@ -145,7 +145,7 @@ module inst_history_unit_test;
         rs2 = cycle+1;
         i32 = inst32_rformat::new_rformat(my_decoder, SUB, rd , rs1, rs2);
         i32.cycle = cycle;
-        my_inst_history.commit_inst(i32);
+        commit_inst(i32);
         //`BREADCRUMB(i32.to_string());
       end
 
@@ -155,7 +155,7 @@ module inst_history_unit_test;
       rs2 = cycle+1;
       i32 = inst32_rformat::new_rformat(my_decoder, ADD, rd , rs1, rs2);
       i32.cycle = cycle;
-      my_inst_history.commit_inst(i32);
+      commit_inst(i32);
       //`BREADCRUMB(i32.to_string());                      
 
       obs_cov = my_inst_history.m_raw_hazard_examiner.get_cross_cov();
@@ -170,7 +170,7 @@ module inst_history_unit_test;
       rs2 = cycle+1;
       i32 = inst32_rformat::new_rformat(my_decoder, ADD, rd , rs1, rs2);
       i32.cycle = cycle;
-      my_inst_history.commit_inst(i32);
+      commit_inst(i32);
       
       obs_cov = my_inst_history.m_raw_hazard_examiner.get_cross_cov();
       `FAIL_UNLESS(int'(obs_cov) == int'(cov_per_bin));
@@ -183,7 +183,7 @@ module inst_history_unit_test;
       rs2 = cycle+1;
       i32 = inst32_rformat::new_rformat(my_decoder, XOR, rd , rs1, rs2);
       i32.cycle = cycle;
-      my_inst_history.commit_inst(i32);
+      commit_inst(i32);
       
       obs_cov = my_inst_history.m_raw_hazard_examiner.get_cross_cov();
       exp_cov = 2.0 * cov_per_bin;
@@ -194,5 +194,10 @@ module inst_history_unit_test;
 
 
   `SVUNIT_TESTS_END
+
+  function void commit_inst(inst32 inst);
+    my_inst_history.commit_inst(inst);
+    `BREADCRUMB(inst.to_string());
+  endfunction
 
 endmodule

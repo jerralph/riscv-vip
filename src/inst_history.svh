@@ -134,7 +134,6 @@ class inst_history#(int DEPTH = 5);
       m_inst_fifo.delete(DEPTH-1);
     end
     m_inst_fifo.push_front(inst);
-    `BREADCRUMB(inst.to_string());
     analyze_new_inst();
   endfunction 
   
