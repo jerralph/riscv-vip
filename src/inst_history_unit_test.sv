@@ -37,7 +37,7 @@ module inst_history_unit_test;
   logic rstn; 
 
   decoder my_decoder;   
-  
+
   //simulator doesn't like a null virtual interfaces
   //this solves this...
   riscv_vip_regfile_if regfile_if(.*);
@@ -48,6 +48,13 @@ module inst_history_unit_test;
   //UUT
   parameter int DEPTH = 5;
   inst_history#(.DEPTH(DEPTH)) my_inst_history;
+
+  inst32 i32;
+  regsel_t rd, rs1, rs2;
+  int size;
+  real obs_cov, exp_cov;
+
+
 
   //===================================
   // Build
@@ -97,15 +104,11 @@ module inst_history_unit_test;
   `SVUNIT_TESTS_BEGIN    
 
     `SVTEST(test_queue)
-      inst32 i32;
-      inst32_rformat i32r;
-      regsel_t rd, rs1, rs2;
-      int size;
       rd = 1;
       rs1 = 1;
       rs2 = 1;
 
-      //Pump in instruction to fill the fifo and one more
+      //Pump in instructions to fill the fifo and then add one more
       for (int i=0; i<DEPTH+1; i++) begin
         rd  = i+1;
         rs1 = i+1;
@@ -117,7 +120,7 @@ module inst_history_unit_test;
         my_inst_history.commit_inst(i32);
       end
 
-      //queue should be full and the inst with rd,rs1,rs2=1,1,1 should be gone
+      //queue should be full and the inst from cycle 0 with rd,rs1,rs2=1,1,1 should be gone
       size =  my_inst_history.size();     
       `FAIL_UNLESS_LOG( size == DEPTH, $psprintf("size is %0d",size));
       i32 = my_inst_history.peek_oldest();
@@ -127,6 +130,67 @@ module inst_history_unit_test;
       `FAIL_UNLESS(i32.get_rd() == ( DEPTH +1));           
 
     `SVTEST_END
+
+    `SVTEST(test_cov)
+      real cov_per_bin;
+      int cycle;
+
+      //Work to hit one bin in the cross coverage
+      //ADD that uses r1 from a SUB 2 cycles ago 
+
+      //Put DEPTH-1 subs into the FIFO, with the regs derived from the cycle
+      for ( cycle=0; cycle<DEPTH-1; cycle++) begin
+        rd  = cycle+1;
+        rs1 = cycle+1;
+        rs2 = cycle+1;
+        i32 = inst32_rformat::new_rformat(my_decoder, SUB, rd , rs1, rs2);
+        i32.cycle = cycle;
+        my_inst_history.commit_inst(i32);
+        //`BREADCRUMB(i32.to_string());
+      end
+
+      //put an add into the FIFO that has a RAW hazard w/ a previous sub        
+      rd  = cycle+1;
+      rs1 = cycle+1-3; //RAW w/ the the SUB 3 cycles ago
+      rs2 = cycle+1;
+      i32 = inst32_rformat::new_rformat(my_decoder, ADD, rd , rs1, rs2);
+      i32.cycle = cycle;
+      my_inst_history.commit_inst(i32);
+      //`BREADCRUMB(i32.to_string());                      
+
+      obs_cov = my_inst_history.m_raw_hazard_examiner.get_cross_cov();
+      cov_per_bin = obs_cov; //this is the coverage of hitting one bin in the giant cross.
+                             //on Questa, verify this via view->coverage->covergroups 
+
+      //put an add into the FIFO which should not effect coverage since it's the same as 
+      //already scored         
+      cycle++;
+      rd  = cycle+1;
+      rs1 = cycle+1-3; //RAW w/ the the SUB 3 cycles ago
+      rs2 = cycle+1;
+      i32 = inst32_rformat::new_rformat(my_decoder, ADD, rd , rs1, rs2);
+      i32.cycle = cycle;
+      my_inst_history.commit_inst(i32);
+      
+      obs_cov = my_inst_history.m_raw_hazard_examiner.get_cross_cov();
+      `FAIL_UNLESS(int'(obs_cov) == int'(cov_per_bin));
+
+
+      //rack up another atom of the cross cov
+      cycle++;
+      rd  = cycle+1;
+      rs1 = cycle+1-2; //RAW w/ the ADD 2 cycles ago
+      rs2 = cycle+1;
+      i32 = inst32_rformat::new_rformat(my_decoder, XOR, rd , rs1, rs2);
+      i32.cycle = cycle;
+      my_inst_history.commit_inst(i32);
+      
+      obs_cov = my_inst_history.m_raw_hazard_examiner.get_cross_cov();
+      exp_cov = 2.0 * cov_per_bin;
+      `FAIL_UNLESS_LOG(obs_cov == exp_cov, $psprintf("obs,exp=%e,%e",obs_cov,exp_cov));
+
+    `SVTEST_END
+
 
 
   `SVUNIT_TESTS_END

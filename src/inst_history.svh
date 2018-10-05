@@ -29,8 +29,8 @@
 //class is use for coverage
 class raw_hazard_examiner;
   typedef enum {RS1_ONLY, RS2_ONLY, RS1AND2, NONE} raw_rs_case_enum_t;
-  static const int MAX_CYCLES_APART_OF_INTEREST = 3;
-  int m_cycles_apart;
+  static const int unsigned MAX_CYCLES_APART_OF_INTEREST = 3;
+  int unsigned m_cycles_apart;
   inst32 m_rd_inst;  //younger
   inst32 m_wr_inst;  //older
   raw_rs_case_enum_t raw_rs_case = NONE;  //raw register source case
@@ -49,11 +49,11 @@ class raw_hazard_examiner;
     }
 
     cyc_apart_cp : coverpoint m_cycles_apart {
-      bins cycs[] = {[1:MAX_CYCLES_APART_OF_INTEREST]};
+      bins cycs[] = {[1:MAX_CYCLES_APART_OF_INTEREST]}; 
     }
-    inst_X_rs_case_X_cyc_apart : cross read_inst_cp, rs_case_cp, cyc_apart_cp{
+    inst_x_rs_case_x_cyc_apart : cross read_inst_cp, rs_case_cp, cyc_apart_cp{
       //for insts that don't have rs2 fields only look at the RS1 case (and not the rs2 cases). 
-      ignore_bins ignore_rs2_for_nor_rs2_insts = inst_X_rs_case_X_cyc_apart with 
+      ignore_bins ignore_rs2_for_nor_rs2_insts = inst_x_rs_case_x_cyc_apart with 
         ( !(read_inst_cp inside {`INSTS_W_RS2_LIST}) && (rs_case_cp != RS1_ONLY) );
     }
       
@@ -63,12 +63,12 @@ class raw_hazard_examiner;
     raw_cg = new();
   endfunction
   
-  virtual function void examine(
-      inst32 curr_inst, 
-      inst32 older_inst, 
-      int cycles_apart
-    );
-    if (cycles_apart <= MAX_CYCLES_APART_OF_INTEREST) begin
+  virtual function void examine( inst32 curr_inst, inst32 older_inst );
+
+    m_cycles_apart = curr_inst.cycle - older_inst.cycle; 
+
+    if (m_cycles_apart <= MAX_CYCLES_APART_OF_INTEREST) begin
+
       //source reg 1 read after write condition?
       bit rs1_raw = 
         curr_inst.has_rs1() && 
@@ -82,7 +82,11 @@ class raw_hazard_examiner;
         (curr_inst.get_rs2() != X0_ZERO) &&
         older_inst.has_rd() &&
         (curr_inst.get_rs2() == older_inst.get_rd());
-         
+
+//    `BREADCRUMB(curr_inst.to_string());
+//    `BREADCRUMB(older_inst.to_string());
+//    `BREADCRUMB($psprintf("cycles_apart =%0d",m_cycles_apart));
+
       m_rd_inst = curr_inst;
       m_wr_inst = older_inst;
       
@@ -102,10 +106,17 @@ class raw_hazard_examiner;
           raw_rs_case = NONE;
         end
       endcase
-      m_cycles_apart = cycles_apart;  
-      raw_cg.sample();  //may want to move this so user has more control over sample...
+      raw_cg.sample();  //Beware if sample is moved.  This method is called
+                        //multiple times per cycle with the newest instruction
+                        //and each older one in the history.  If sample
+                        //isn't called for each one then only the last one 
+                        //is registered
     end
   endfunction  
+    
+  virtual function real get_cross_cov();
+    return raw_cg.inst_x_rs_case_x_cyc_apart.get_coverage();
+  endfunction
   
 endclass
   
@@ -123,18 +134,19 @@ class inst_history#(int DEPTH = 5);
       m_inst_fifo.delete(DEPTH-1);
     end
     m_inst_fifo.push_front(inst);
+    `BREADCRUMB(inst.to_string());
     analyze_new_inst();
   endfunction 
   
+  
+  //This should be followed by a sample_cov (once the instruction passes any checking)
   virtual protected function void analyze_new_inst();
     //TODO: associate cycle with instruction to get proper distance...
     inst32 new_inst = peek_newest();
-    int unsigned cycles_apart;
 
     for( int i=1; i < m_inst_fifo.size(); i++ ) begin
       inst32 older_inst = m_inst_fifo[i];
-      cycles_apart = older_inst.cycle - new_inst.cycle;
-      m_raw_hazard_examiner.examine(new_inst, older_inst, cycles_apart);
+      m_raw_hazard_examiner.examine(new_inst, older_inst);
     end
     
   endfunction
@@ -156,7 +168,7 @@ class inst_history#(int DEPTH = 5);
   virtual function int size();
     return m_inst_fifo.size();
   endfunction
-
+  
 endclass 
  
 `endif

@@ -239,7 +239,7 @@ virtual class inst32;
     xlen_t rs1_val, rs2_val;
 
     rvg_format_str = m_rvg_format.name();
-    str = $psprintf("%08H %s ", m_inst, rvg_format_str);
+    str = $psprintf("%0d %08H %s ", cycle, m_inst, rvg_format_str);
 
     str={str,get_name_string()," "};
     if (has_rd())  begin
