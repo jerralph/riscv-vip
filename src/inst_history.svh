@@ -23,10 +23,9 @@
 `ifndef _INST_HISTORY_INCLUDED_
 `define _INST_HISTORY_INCLUDED_
 
-//Read after write data hazard. Latest instruction
+//Read after write (RAW) data hazard. Latest instruction
 //gets its rs1 or rs2 from earlier instruction's rd
-//rather than from the regfile value.  The raw_hazard
-//class is use for coverage
+//rather than from the regfile value.  This is use for coverage
 class raw_hazard_examiner;
   typedef enum {RS1_ONLY, RS2_ONLY, RS1AND2, NONE} raw_rs_case_enum_t;
   static const int unsigned MAX_CYCLES_APART_OF_INTEREST = 3;
@@ -37,26 +36,30 @@ class raw_hazard_examiner;
   
   covergroup raw_cg;
     read_inst_cp : coverpoint m_rd_inst.get_inst_enum(){
+      option.weight = 0; //only count the cross
       ignore_bins ignore_has_no_rs_insts = {`INSTS_WITH_NO_RS_LIST};
     } 
-//consider bringing the instruction type of the write into the cross... 
-//for now, keep it simpler.  add in if this is deemed important
-//    wr_inst_cp : coverpoint m_rd_inst.get_inst_enum(){
-//      //TODO excludes or maybe iff
-//    }
+
     rs_case_cp : coverpoint raw_rs_case iff(raw_rs_case != NONE){
+      option.weight = 0; //only count the cross
       ignore_bins ignore_none = {NONE};
     }
 
     cyc_apart_cp : coverpoint m_cycles_apart {
+      option.weight = 0; //only count the cross
       bins cycs[] = {[1:MAX_CYCLES_APART_OF_INTEREST]}; 
     }
     inst_x_rs_case_x_cyc_apart : cross read_inst_cp, rs_case_cp, cyc_apart_cp{
       //for insts that don't have rs2 fields only look at the RS1 case (and not the rs2 cases). 
-      ignore_bins ignore_rs2_for_nor_rs2_insts = inst_x_rs_case_x_cyc_apart with 
+      ignore_bins ignore_rs2_for_non_rs2_insts = inst_x_rs_case_x_cyc_apart with 
         ( !(read_inst_cp inside {`INSTS_W_RS2_LIST}) && (rs_case_cp != RS1_ONLY) );
     }
-      
+
+//FUTURE: consider bringing the instruction type of the older/write into the cross... 
+//for now, keep it simple. 
+//    wr_inst_cp : coverpoint m_rd_inst.get_inst_enum(){
+//    }
+
   endgroup
   
   function new();
@@ -83,10 +86,6 @@ class raw_hazard_examiner;
         older_inst.has_rd() &&
         (curr_inst.get_rs2() == older_inst.get_rd());
 
-//    `BREADCRUMB(curr_inst.to_string());
-//    `BREADCRUMB(older_inst.to_string());
-//    `BREADCRUMB($psprintf("cycles_apart =%0d",m_cycles_apart));
-
       m_rd_inst = curr_inst;
       m_wr_inst = older_inst;
       
@@ -106,14 +105,19 @@ class raw_hazard_examiner;
           raw_rs_case = NONE;
         end
       endcase
-      raw_cg.sample();  //Beware if sample is moved.  This method is called
-                        //multiple times per cycle with the newest instruction
-                        //and each older one in the history.  If sample
-                        //isn't called for each one then only the last one 
-                        //is registered
+      post_examine(); 
     end
   endfunction  
-    
+
+  //Override post_examine to gate based on passing checking before cov, 
+  //for no check keep it as is.  Beware of moving the sample out of this
+  //method.  Sample is be called multiple times per cycle as the current 
+  //instruction is scanned against historical instructions.
+  virtual function post_examine();
+      raw_cg.sample();  
+  endfunction;
+
+
   virtual function real get_cross_cov();
     return raw_cg.inst_x_rs_case_x_cyc_apart.get_coverage();
   endfunction

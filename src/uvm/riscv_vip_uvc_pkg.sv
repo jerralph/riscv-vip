@@ -40,6 +40,7 @@ package riscv_vip_uvc_pkg;
   `include "i32_monitor.svh"
   `include "i32_agent.svh"
   `include "i32_cov_subscriber.svh"
+  `include "inst_history_subscriber.svh"
   `include "uvc_env.svh"
    
 endpackage

@@ -35,6 +35,7 @@ class i32_monitor extends uvm_monitor;
   int                         m_tracker_file;
   logic [31:0]                m_last_pc = 'hFFFFFFFE;  
   i32_item                    m_item;
+  int unsigned                m_cycle = 0;
   
   uvm_analysis_port#(i32_item) m_ap;
   
@@ -68,6 +69,10 @@ class i32_monitor extends uvm_monitor;
     //grabbing register file values for decoded instruction
     fork
       forever begin
+          @(posedge m_vi.clk);
+          m_cycle++;
+      end
+      forever begin
         @(posedge m_vi.clk iff m_vi.curr_pc !== m_last_pc);
         ->do_trasact_e;
         m_last_pc = m_vi.curr_pc;      
@@ -89,6 +94,7 @@ class i32_monitor extends uvm_monitor;
     
     if( item.m_inst != null ) begin
       m_reg_fetcher.fetch_regs(item.m_inst);  //associate the reg values w/ instruction
+      item.m_inst.cycle = m_cycle;  //needed by the inst_history
     end
       
     item.m_addr = m_vi.curr_pc;

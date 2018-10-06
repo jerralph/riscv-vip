@@ -54,6 +54,44 @@ virtual class inst32;
   
   covergroup inst_cg ();
     inst_cp : coverpoint m_inst_enum;
+    same_rd_rs1_cp : coverpoint 1 iff(
+      has_rd()  && 
+      has_rs1() && 
+      (get_rd() == get_rs1())  &&
+      (!has_rs2() || has_rs2() && get_rs2() != get_rs1()) &&
+      (get_rd()  != X0_ZERO) ){
+        option.weight =0; //only count the cross
+      }
+    same_rd_rs2_cp : coverpoint 1 iff(
+      has_rd()  && 
+      has_rs2() && 
+      (get_rd() != get_rs1()) &&
+      (get_rd() == get_rs2()) &&
+      (get_rd()  != X0_ZERO) ){
+        option.weight =0; //only count the cross
+      }
+    same_rd_rs1_rs2_cp : coverpoint 1 iff(
+      has_rd()  && 
+      has_rs1() && 
+      has_rs2() && 
+      (get_rd() == get_rs1()) &&
+      (get_rd() == get_rs2()) &&
+      (get_rd()  != X0_ZERO)){
+        option.weight =0; //only count the cross
+      }
+    inst_x_same_rd_rs1 : cross inst_cp, same_rd_rs1_cp {
+      ignore_bins ignore_has_no_rs_rd_insts = inst_x_same_rd_rs1 with 
+      (inst_cp inside {`INSTS_WITH_NO_RS_LIST, `INSTS_W_NO_RD_LIST} );     
+    }
+    inst_x_same_rd_rs2 : cross inst_cp, same_rd_rs2_cp {
+      ignore_bins ignore_has_no_rs2_rd_insts = inst_x_same_rd_rs2 with 
+      (inst_cp inside {`INSTS_W_NO_RD_LIST} || !(inst_cp inside {`INSTS_W_RS2_LIST}) );     
+    }    
+    inst_x_same_rd_rs1_rs2 : cross inst_cp, same_rd_rs1_rs2_cp {
+      ignore_bins ignore_has_no_rs1_rs2_rd_insts = inst_x_same_rd_rs1_rs2 with
+      ( !(inst_cp inside {`INSTS_W_RD_RS1_RS2_LIST}) );
+    }
+
   endgroup
   
   function new(inst_t inst);

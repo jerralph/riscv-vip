@@ -180,7 +180,7 @@ module inst_history_unit_test;
       cycle++;
       rd  = cycle+1;
       rs1 = cycle+1-2; //RAW w/ the ADD 2 cycles ago
-      rs2 = cycle+1;
+      rs2 = cycle+1-2; //RAW w/ the ADD 2 cycles ago
       i32 = inst32_rformat::new_rformat(my_decoder, XOR, rd , rs1, rs2);
       i32.cycle = cycle;
       commit_inst(i32);

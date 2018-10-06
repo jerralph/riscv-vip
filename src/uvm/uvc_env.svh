@@ -32,6 +32,7 @@ class uvc_env extends uvm_env;
 
   i32_agent          	m_i32_agent[`NUM_CORES];
   i32_cov_subscriber 	m_cov; 
+  inst_history_subscriber m_hist;  //need to eventually be per core
    
   //------------------------------------------------------------------
   // environment UVM components
@@ -44,6 +45,7 @@ class uvc_env extends uvm_env;
   `uvm_component_utils_begin(uvc_env)
     `uvm_field_sarray_object(m_i32_agent, UVM_ALL_ON)
     `uvm_field_object(m_cov, UVM_ALL_ON)
+    `uvm_field_object(m_hist, UVM_ALL_ON)
   `uvm_component_utils_end
 
   //----------------------------------------------------------------------------
@@ -71,6 +73,7 @@ function void uvc_env::build_phase(uvm_phase phase);
   super.build_phase(phase);
   //Create coverage instantiation
   m_cov = i32_cov_subscriber::type_id::create("cov",this);
+  m_hist = inst_history_subscriber::type_id::create("m_hist",this);
   for (int i = 0; i < `NUM_CORES; i++) begin : gen_cores
     //RISCV_VIP
     begin
@@ -93,6 +96,7 @@ function void uvc_env::connect_phase(uvm_phase phase);
     super.connect_phase(phase);
     for (int i = 0; i < `NUM_CORES; i++) begin : gen_cores
          m_i32_agent[i].m_monitor.m_ap.connect(m_cov.analysis_export);
+         m_i32_agent[i].m_monitor.m_ap.connect(m_hist.analysis_export);
      end : gen_cores
 endfunction : connect_phase
 
