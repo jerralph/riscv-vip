@@ -135,7 +135,7 @@ module reg_fetcher_unit_test;
         //Print the instruction string.  This should include the rf.rs1/2 values
         string_val = addi.to_string(); 
         $display(string_val);
-        string_match = (string_val == "ffff8193 I ADDI X3_GP, X31_T6, -1 |  rf.X31_T6 = 3435973836");                
+        string_match = (string_val == "0 ffff8193 I ADDI X3_GP, X31_T6, -1 |  rf.X31_T6 = 3435973836");                
         `FAIL_UNLESS(string_match)        
                 
         rs1_val = addi.get_rs1_val();
@@ -179,13 +179,25 @@ module reg_fetcher_unit_test;
         string string_val;
         bit string_match;
 
+        //Used the following to debug a weird error... that was due to the way
+        //the internal m_inst_enum is calculated/used...  Fixed the bug 
+        //but left the testing here in case it pops up again.
+        `FAIL_UNLESS_LOG(add.get_inst_enum() == ADD, add.get_inst_enum().name() );
+
+
         uut.fetch_regs(add);
+        
+        `FAIL_UNLESS( !(ADD inside {`INSTS_WITH_NO_RS_LIST}));
+        `FAIL_UNLESS(add.has_rs1());
+        `FAIL_UNLESS(add.has_rs1_val_set());
+        `FAIL_UNLESS(add.get_rs1_val() === 1);
+
 
         //Print the instruction string.  This should include the rf.rs1/2 values
         string_val = add.to_string(); 
         $display(string_val);
 
-        string_match = (string_val == "00208fb3 R ADD X31_T6, X1_RA, X2_SP  |  rf.X1_RA = 1, rf.X2_SP = 2");                
+        string_match = (string_val == "0 00208fb3 R ADD X31_T6, X1_RA, X2_SP  |  rf.X1_RA = 1, rf.X2_SP = 2");                
         `FAIL_UNLESS(string_match)        
 
 

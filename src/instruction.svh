@@ -40,7 +40,7 @@ virtual class inst32;
   int unsigned cycle;  //The clock cycle associated with commit of the instruction
   rand inst_t  m_inst;
   rvg_format_t m_rvg_format  = UNKNOWN;
-  inst_enum_t  m_inst_enum;
+  protected inst_enum_t  m_inst_enum;
 
   bit [63:0] m_decode_cycle;  //The value of the cycle CSR when instruction decoded
   
@@ -51,6 +51,7 @@ virtual class inst32;
   
   bit m_rs1_val_set = 0;
   bit m_rs2_val_set = 0;
+  bit m_inst_enum_set = 0;
   
   covergroup inst_cg ();
     inst_cp : coverpoint m_inst_enum;
@@ -145,7 +146,7 @@ virtual class inst32;
   endfunction // get_rd
 
   virtual function bit has_rs1();
-    return (!(m_inst_enum inside {`INSTS_WITH_NO_RS_LIST}));
+    return ( !(get_inst_enum() inside {`INSTS_WITH_NO_RS_LIST}) );
   endfunction // has_rs1
 
   virtual function reg_id_t get_rs1();
@@ -154,10 +155,8 @@ virtual class inst32;
   endfunction    
 
   //Set the value of the rs1 register referenced by the instruction.
-  //This is generally the value of x[rs1] at the when the instruction in at the 
-  //decode stage of the pipeline.  For data hazards the value may be different 
   virtual function void set_rs1_val(xlen_t val);
-    assert(has_rs1()) else $fatal(1);
+    assert(has_rs1()) else $fatal(1,to_string());
     m_rs1_val_set = 1;
     m_rs1_val = val;    
   endfunction   
@@ -167,10 +166,8 @@ virtual class inst32;
   endfunction
 
   //Get the value of the x[rs1] as referenced by the rs1 field of the instruction
-  //This is the value of x[rs1] from the reg file at decode stage and may be different than the 
-  //x[rs1] in the case of data pipeline hazards - beware! 
   virtual function xlen_t get_rs1_val();
-    assert(has_rs1() && has_rs1_val_set() ) else $fatal(1);      
+    assert(has_rs1() && has_rs1_val_set() ) else $fatal(1,to_string());      
     return m_rs1_val;  
   endfunction   
       
@@ -218,48 +215,51 @@ virtual class inst32;
 
   //get the inst_enum_t for this inst, the RV32I unique enum. see risc_vip_pkg.sv
   virtual function inst_enum_t get_inst_enum();
-    inst_enum_t inst = UNKNOWN_INST;
-    case (m_rvg_format)
-      R: begin
-        r_inst_t r = m_inst.r_inst;
-        inst  = r_inst_by_funct7funct3major[{r.funct7,r.funct3,get_opcode()}];
-        if (inst == UNKNOWN_INST ) begin
-          $display("UNKNOWN_INST {r.funct7,r.funct3,get_opcode()} = {%7b,%3b,%7b}", r.funct7,r.funct3,get_opcode());
+    
+    if (!m_inst_enum_set) begin
+      inst_enum_t inst = UNKNOWN_INST;
+      case (m_rvg_format)
+        R: begin
+          r_inst_t r = m_inst.r_inst;
+          inst  = r_inst_by_funct7funct3major[{r.funct7,r.funct3,get_opcode()}];
+          if (inst == UNKNOWN_INST ) begin
+            $display("UNKNOWN_INST {r.funct7,r.funct3,get_opcode()} = {%7b,%3b,%7b}", r.funct7,r.funct3,get_opcode());
+          end
         end
-      end
-      I,S,B: begin
-        //$display("ISB Decode 0b%b m_inst.b_inst.funct3 = 0b%b",m_inst, m_inst.b_inst.funct3);
-        inst  = isb_inst_by_funct3major[{m_inst.b_inst.funct3,get_opcode()}];
-
-        //Deal with some special cases for I insts, where the immediate field
-        //decides on the instruction
-        case (inst)
-          SRLI,SRAI: begin
-            i_shamt_inst_t shamt_inst = i_shamt_inst_t'(m_inst.i_inst);          
-            case (shamt_inst.imm_code)
-              SRLI_IMM_31_25 : inst = SRLI;
-              SRAI_IMM_31_25 : inst = SRAI;
-              default : inst = UNKNOWN_INST;
-            endcase // case (shamt_inst.imm_code)
-          end
-          ECALL, EBREAK: begin
-            case (m_inst.i_inst.imm)
-              0: inst = ECALL;
-              1: inst = EBREAK;
-              default : inst = UNKNOWN_INST;
-            endcase
-          end
-        endcase
-      end
-      U,J: begin
-        inst  = uj_inst_by_major[get_rvg_major_opcode()];
-      end
-    endcase // case (m_rvg_format)
-
-    //set the member variable 
-    m_inst_enum = inst;
-
-    return inst;
+        I,S,B: begin
+          //$display("ISB Decode 0b%b m_inst.b_inst.funct3 = 0b%b",m_inst, m_inst.b_inst.funct3);
+          inst  = isb_inst_by_funct3major[{m_inst.b_inst.funct3,get_opcode()}];
+  
+          //Deal with some special cases for I insts, where the immediate field
+          //decides on the instruction
+          case (inst)
+            SRLI,SRAI: begin
+              i_shamt_inst_t shamt_inst = i_shamt_inst_t'(m_inst.i_inst);          
+              case (shamt_inst.imm_code)
+                SRLI_IMM_31_25 : inst = SRLI;
+                SRAI_IMM_31_25 : inst = SRAI;
+                default : inst = UNKNOWN_INST;
+              endcase // case (shamt_inst.imm_code)
+            end
+            ECALL, EBREAK: begin
+              case (m_inst.i_inst.imm)
+                0: inst = ECALL;
+                1: inst = EBREAK;
+                default : inst = UNKNOWN_INST;
+              endcase
+            end
+          endcase
+        end
+        U,J: begin
+          inst  = uj_inst_by_major[get_rvg_major_opcode()];
+        end
+      endcase // case (m_rvg_format)
+  
+      //set the member variable 
+      m_inst_enum = inst;
+      m_inst_enum_set = 1;
+    end
+    return m_inst_enum;    
     
   endfunction    
       

@@ -198,7 +198,7 @@ module i32_agent_unit_test;
       i32 = my_i32_agent_wrapper.m_item;
       l_inst32 = i32.m_inst;
       item_cnt = my_i32_agent_wrapper.m_write_cnt;
-      i32.print();
+      //i32.print();
       `FAIL_UNLESS(i32 != last_i32);    //ensure a fresh item is created by the monitor
       `FAIL_UNLESS(i32.m_addr == pc_insts[i][0]);
       `FAIL_UNLESS(i32.m_inst_bits == pc_insts[i][1]);
