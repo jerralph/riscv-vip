@@ -115,7 +115,7 @@ class raw_hazard_examiner;
   //instruction is scanned against historical instructions.
   virtual function post_examine();
       raw_cg.sample();  
-  endfunction;
+  endfunction
 
 
   virtual function real get_cross_cov();

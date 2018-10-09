@@ -182,7 +182,7 @@ module reg_fetcher_unit_test;
         //Used the following to debug a weird error... that was due to the way
         //the internal m_inst_enum is calculated/used...  Fixed the bug 
         //but left the testing here in case it pops up again.
-        `FAIL_UNLESS_LOG(add.get_inst_enum() == ADD, add.get_inst_enum().name() );
+        `FAIL_UNLESS(add.get_inst_enum() == ADD );
 
 
         uut.fetch_regs(add);
