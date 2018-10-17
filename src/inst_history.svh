@@ -38,6 +38,7 @@ class raw_hazard_examiner;
     read_inst_cp : coverpoint m_rd_inst.get_inst_enum(){
       option.weight = 0; //only count the cross
       ignore_bins ignore_has_no_rs_insts = {`INSTS_WITH_NO_RS_LIST};
+      ignore_bins unknown_inst = {UNKNOWN_INST};
     } 
 
     rs_case_cp : coverpoint raw_rs_case iff(raw_rs_case != NONE){
@@ -50,7 +51,7 @@ class raw_hazard_examiner;
       bins cycs[] = {[1:MAX_CYCLES_APART_OF_INTEREST]}; 
     }
     inst_x_rs_case_x_cyc_apart : cross read_inst_cp, rs_case_cp, cyc_apart_cp{
-      //for insts that don't have rs2 fields only look at the RS1 case (and not the rs2 cases). 
+      //for insts w/o rs2 fields, only look at the RS1 case (ignore rs2 cases). 
       ignore_bins ignore_rs2_for_non_rs2_insts = inst_x_rs_case_x_cyc_apart with 
         ( !(read_inst_cp inside {`INSTS_W_RS2_LIST}) && (rs_case_cp != RS1_ONLY) );
     }
@@ -75,14 +76,14 @@ class raw_hazard_examiner;
       //source reg 1 read after write condition?
       bit rs1_raw = 
         curr_inst.has_rs1() && 
-        (curr_inst.get_rs1() != X0_ZERO) &&
+        (curr_inst.get_rs1() != X0) &&
         older_inst.has_rd() &&
         (curr_inst.get_rs1() == older_inst.get_rd());
   
       //source reg 2 read after write condition?
       bit rs2_raw = 
         curr_inst.has_rs2() && 
-        (curr_inst.get_rs2() != X0_ZERO) &&
+        (curr_inst.get_rs2() != X0) &&
         older_inst.has_rd() &&
         (curr_inst.get_rs2() == older_inst.get_rd());
 

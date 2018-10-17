@@ -415,38 +415,38 @@ package riscv_vip_pkg;
   //Enumerated type for the different registers
   //Xn_<specialized_name> notation is used
   typedef enum regsel_t {
-    X0_ZERO,      //Hardwired zero
-    X1_RA,        //Return addr
-    X2_SP,        //Stack pointer
-    X3_GP,        //Global pointer
-    X4_TP,        //Thread pointer
-    X5_T0,        //Temp
-    X6_T1,        //Temp
-    X7_T2,        //Temp
-    X8_S0_FP,     //Saved reg / Frame Pointer
-    X9_S1,        //Saved reg 
-    X10_A0,       //Function arg, return value
-    X11_A1,       //Function arg, return value
-    X12_A2,       //Function arg
-    X13_A3,       //Function arg
-    X14_A4,       //Function arg
-    X15_A5,       //Function arg
-    X16_A6,       //Function arg
-    X17_A7,       //Function arg
-    X18_S2,       //Saved reg
-    X19_S3,       //Saved reg
-    X20_S4,       //Saved reg      
-    X21_S5,       //Saved reg
-    X22_S6,       //Saved reg
-    X23_S7,       //Saved reg
-    X24_S8,       //Saved reg
-    X25_S9,       //Saved reg
-    X26_S10,      //Saved reg
-    X27_S11,      //Saved reg
-    X28_T3,       //Temp
-    X29_T4,       //Temp
-    X30_T5,       //Temp
-    X31_T6        //Temp
+    X0/* _ZERO */,      //Hardwired zero
+    X1/* _RA */,        //Return addr
+    X2/* _SP */,        //Stack pointer
+    X3/* _GP */,        //Global pointer
+    X4/* _TP */,        //Thread pointer
+    X5/* _T0 */,        //Temp
+    X6/* _T1 */,        //Temp
+    X7/* _T2 */,        //Temp
+    X8/* _S0_FP */,     //Saved reg / Frame Pointer
+    X9/* _S1 */,        //Saved reg 
+    X10/* _A0 */,       //Function arg, return value
+    X11/* _A1 */,       //Function arg, return value
+    X12/* _A2 */,       //Function arg
+    X13/* _A3 */,       //Function arg
+    X14/* _A4 */,       //Function arg
+    X15/* _A5 */,       //Function arg
+    X16/* _A6 */,       //Function arg
+    X17/* _A7 */,       //Function arg
+    X18/* _S2 */,       //Saved reg
+    X19/* _S3 */,       //Saved reg
+    X20/* _S4 */,       //Saved reg      
+    X21/* _S5 */,       //Saved reg
+    X22/* _S6 */,       //Saved reg
+    X23/* _S7 */,       //Saved reg
+    X24/* _S8 */,       //Saved reg
+    X25/* _S9 */,       //Saved reg
+    X26/* _S10 */,      //Saved reg
+    X27/* _S11 */,      //Saved reg
+    X28/* _T3 */,       //Temp
+    X29/* _T4 */,       //Temp
+    X30/* _T5 */,       //Temp
+    X31/* _T6 */        //Temp
   } reg_id_t;
    
 endpackage 

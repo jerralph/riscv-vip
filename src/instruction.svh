@@ -60,7 +60,7 @@ virtual class inst32;
       has_rs1() && 
       (get_rd() == get_rs1())  &&
       (!has_rs2() || has_rs2() && get_rs2() != get_rs1()) &&
-      (get_rd()  != X0_ZERO) ){
+      (get_rd()  != X0) ){
         option.weight =0; //only count the cross
       }
     same_rd_rs2_cp : coverpoint 1 iff(
@@ -68,7 +68,7 @@ virtual class inst32;
       has_rs2() && 
       (get_rd() != get_rs1()) &&
       (get_rd() == get_rs2()) &&
-      (get_rd()  != X0_ZERO) ){
+      (get_rd()  != X0) ){
         option.weight =0; //only count the cross
       }
     same_rd_rs1_rs2_cp : coverpoint 1 iff(
@@ -77,7 +77,7 @@ virtual class inst32;
       has_rs2() && 
       (get_rd() == get_rs1()) &&
       (get_rd() == get_rs2()) &&
-      (get_rd()  != X0_ZERO)){
+      (get_rd()  != X0)){
         option.weight =0; //only count the cross
       }
     inst_x_same_rd_rs1 : cross inst_cp, same_rd_rs1_cp {
@@ -685,7 +685,7 @@ class inst32_bformat extends inst32;
       bins b_insts[] = {`B_INSTS_LIST};
     }
     i32b_inst_x_imm :cross i32b_insts_cp, i32b_imm_cp;
-    //TODO VR to cross the value of the register with the offset...
+    ///i32b_inst_x_val_offset: cross /// TODO
   endgroup
   
   //TODO: cover the different fields in isolation (since there is a weird combining)
