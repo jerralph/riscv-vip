@@ -135,7 +135,7 @@ module reg_fetcher_unit_test;
         //Print the instruction string.  This should include the rf.rs1/2 values
         string_val = addi.to_string(); 
         $display(string_val);
-        string_match = (string_val == "0 ffff8193 I ADDI X3_GP, X31_T6, -1 |  rf.X31_T6 = 3435973836");                
+        string_match = (string_val == "0 ffff8193 I ADDI X3, X31, -1 |  rf.X31 = 3435973836");                
         `FAIL_UNLESS(string_match)        
                 
         rs1_val = addi.get_rs1_val();
@@ -197,7 +197,7 @@ module reg_fetcher_unit_test;
         string_val = add.to_string(); 
         $display(string_val);
 
-        string_match = (string_val == "0 00208fb3 R ADD X31_T6, X1_RA, X2_SP  |  rf.X1_RA = 1, rf.X2_SP = 2");                
+        string_match = (string_val == "0 00208fb3 R ADD X31, X1, X2  |  rf.X1 = 1, rf.X2 = 2");                
         `FAIL_UNLESS(string_match)        
 
 
