@@ -143,9 +143,7 @@ class inst_history#(int DEPTH = 5);
   endfunction 
   
   
-  //This should be followed by a sample_cov (once the instruction passes any checking)
   virtual protected function void analyze_new_inst();
-    //TODO: associate cycle with instruction to get proper distance...
     inst32 new_inst = peek_newest();
 
     for( int i=1; i < m_inst_fifo.size(); i++ ) begin
