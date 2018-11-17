@@ -37,7 +37,7 @@ endclass // inst16
  */
 virtual class inst32;
   
-  int unsigned cycle;  //The clock cycle associated with commit of the instruction
+  int unsigned m_cycle;  //The clock cycle associated with commit of the instruction
   rand inst_t  m_inst;
   rvg_format_t m_rvg_format  = UNKNOWN;
   protected inst_enum_t  m_inst_enum;
@@ -53,7 +53,57 @@ virtual class inst32;
   bit m_rs2_val_set = 0;
   bit m_inst_enum_set = 0;
   
-  covergroup inst_cg ();
+  covergroup rd_bins_cg();
+    rd_inst_cp : coverpoint m_inst_enum {
+      ignore_bins ignore_has_no_rd = {`INSTS_W_NO_RD_LIST};
+    }
+    rd_bins_cp : coverpoint get_rd() iff ( has_rd() ) {
+      bins zero = {X0};
+      bins middle = {
+        X1, X2, X3, X4, X5, X6, X7, X8, X9, X10,
+        X11, X12, X13, X14, X15, X16, X17, X18, X19, X20,
+        X21, X22, X23, X24, X25, X26, X27, X28, X29, X30
+      };
+      bins thirty1 = {X31};
+    }
+    rd_inst_x_bins : cross rd_inst_cp, rd_bins_cp;            
+  endgroup
+
+  covergroup rs1_bins_cg();
+    rs1_inst_cp : coverpoint m_inst_enum {
+      ignore_bins ignore_has_no_rs1 = {`INSTS_WITH_NO_RS_LIST};
+    }
+    rs1_bins_cp : coverpoint get_rs1() iff ( has_rs1() ){
+      bins zero = {X0};
+      bins middle = {
+        X1, X2, X3, X4, X5, X6, X7, X8, X9, X10,
+        X11, X12, X13, X14, X15, X16, X17, X18, X19, X20,
+        X21, X22, X23, X24, X25, X26, X27, X28, X29, X30
+      };
+      bins thirty1 = {X31};
+    }
+    rs1_inst_x_bins : cross rs1_inst_cp, rs1_bins_cp;            
+  endgroup
+
+  covergroup rs2_bins_cg();
+    rs2_inst_cp : coverpoint m_inst_enum {
+      bins ignore_has_no_rs2 = {`INSTS_W_RS2_LIST};
+    }
+    rs2_bins_cp : coverpoint get_rs2() iff ( has_rs2() ){
+      bins zero = {X0};
+      bins middle = {
+        X1, X2, X3, X4, X5, X6, X7, X8, X9, X10,
+        X11, X12, X13, X14, X15, X16, X17, X18, X19, X20,
+        X21, X22, X23, X24, X25, X26, X27, X28, X29, X30
+      };
+      bins thirty1 = {X31};
+    }
+    rs2_inst_x_bins : cross rs2_inst_cp, rs2_bins_cp;            
+  endgroup
+
+  
+  
+  covergroup inst_same_regs_cg ();
     inst_cp : coverpoint m_inst_enum;
     same_rd_rs1_cp : coverpoint 1 iff(
       has_rd()  && 
@@ -97,7 +147,7 @@ virtual class inst32;
   
   function new(inst_t inst);
     m_inst = inst;      
-    inst_cg = new();
+    inst_same_regs_cg = new();
   endfunction // new        
 
   pure virtual function void  sample_cov();
@@ -277,7 +327,7 @@ virtual class inst32;
     xlen_t rs1_val, rs2_val;
 
     rvg_format_str = m_rvg_format.name();
-    str = $psprintf("%0d %08H %s ", cycle, m_inst, rvg_format_str);
+    str = $psprintf("%0d %08H %s ", m_cycle, m_inst, rvg_format_str);
 
     str={str,get_name_string()," "};
     if (has_rd())  begin
@@ -376,7 +426,7 @@ class inst32_sformat extends inst32;
   endfunction // new
 
   virtual function void sample_cov();
-    super.inst_cg.sample();
+    super.inst_same_regs_cg.sample();
     imm_cg.sample();
   endfunction
 
@@ -465,7 +515,7 @@ class inst32_rformat extends inst32;
   endfunction // get_imm_string
 
   virtual function void sample_cov();
-    super.inst_cg.sample();
+    super.inst_same_regs_cg.sample();
   endfunction 
 
   virtual function funct7_t get_funct7();
@@ -586,7 +636,7 @@ class inst32_iformat extends inst32;
   endfunction			   
 
   virtual function void sample_cov();
-    super.inst_cg.sample();    
+    super.inst_same_regs_cg.sample();    
     imm_cg.sample();
   endfunction
 
@@ -708,7 +758,7 @@ class inst32_bformat extends inst32;
   endfunction      
 
   virtual function void sample_cov();
-    super.inst_cg.sample();    
+    super.inst_same_regs_cg.sample();    
     imm_cg.sample();
   endfunction
   
@@ -772,7 +822,7 @@ class inst32_uformat extends inst32;
   endfunction		
 
   virtual function void sample_cov();
-    super.inst_cg.sample();
+    super.inst_same_regs_cg.sample();
     imm_cg.sample();
   endfunction
 
@@ -842,7 +892,7 @@ class inst32_jformat extends inst32;
   endfunction
 
   virtual function void sample_cov();
-    super.inst_cg.sample();
+    super.inst_same_regs_cg.sample();
     imm_cg.sample();
   endfunction // sample_cov
 

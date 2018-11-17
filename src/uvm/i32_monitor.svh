@@ -94,7 +94,7 @@ class i32_monitor extends uvm_monitor;
     
     if( item.m_inst != null ) begin
       m_reg_fetcher.fetch_regs(item.m_inst);  //associate the reg values w/ instruction
-      item.m_inst.cycle = m_cycle;  //needed by the inst_history
+      item.m_inst.m_cycle = m_cycle;  //needed by the inst_history
     end
       
     item.m_addr = m_vi.curr_pc;

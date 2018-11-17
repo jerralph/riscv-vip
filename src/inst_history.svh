@@ -23,6 +23,7 @@
 `ifndef _INST_HISTORY_INCLUDED_
 `define _INST_HISTORY_INCLUDED_
 
+
 //Read after write (RAW) data hazard. Latest instruction
 //gets its rs1 or rs2 from earlier instruction's rd
 //rather than from the regfile value.  This is use for coverage
@@ -57,7 +58,7 @@ class raw_hazard_examiner;
     }
 
 //FUTURE: consider bringing the instruction type of the older/write into the cross... 
-//for now, keep it simple. 
+//for now, keep it simple. At very least may want to ensure the write is of the different L,R,... types.
 //    wr_inst_cp : coverpoint m_rd_inst.get_inst_enum(){
 //    }
 
@@ -69,7 +70,7 @@ class raw_hazard_examiner;
   
   virtual function void examine( inst32 curr_inst, inst32 older_inst );
 
-    m_cycles_apart = curr_inst.cycle - older_inst.cycle; 
+    m_cycles_apart = curr_inst.m_cycle - older_inst.m_cycle; 
 
     if (m_cycles_apart <= MAX_CYCLES_APART_OF_INTEREST) begin
 
