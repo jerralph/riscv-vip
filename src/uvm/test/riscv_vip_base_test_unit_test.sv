@@ -196,7 +196,7 @@ module riscv_vip_base_test_unit_test;
 
 
    //Expect no coverage
-   `FAIL_UNLESS(i32i.inst_cg.inst_cp.get_coverage() == 0)
+   `FAIL_UNLESS(i32i.inst_same_regs_cg.inst_cp.get_coverage() == 0)
 
    
     // Toggle interface pins
@@ -207,7 +207,7 @@ module riscv_vip_base_test_unit_test;
    end
 
    //Expect some coverage
-   `FAIL_UNLESS(i32i.inst_cg.inst_cp.get_coverage() > 0)
+   `FAIL_UNLESS(i32i.inst_same_regs_cg.inst_cp.get_coverage() > 0)
    
    
   `SVTEST_END
