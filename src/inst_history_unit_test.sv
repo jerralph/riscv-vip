@@ -115,7 +115,7 @@ module inst_history_unit_test;
         rs2 = i+1;
         i32 = inst32_rformat::new_rformat(my_decoder, ADD, rd , rs1, rs2);
         `FAIL_UNLESS(i32);  //fail on null
-        i32.cycle = i;
+        i32.m_cycle = i;
         //`BREADCRUMB(i32.to_string());
         my_inst_history.commit_inst(i32);
       end
@@ -144,7 +144,7 @@ module inst_history_unit_test;
         rs1 = cycle+1;
         rs2 = cycle+1;
         i32 = inst32_rformat::new_rformat(my_decoder, SUB, rd , rs1, rs2);
-        i32.cycle = cycle;
+        i32.m_cycle = cycle;
         commit_inst(i32);
         //`BREADCRUMB(i32.to_string());
       end
@@ -154,7 +154,7 @@ module inst_history_unit_test;
       rs1 = cycle+1-3; //RAW w/ the the SUB 3 cycles ago
       rs2 = cycle+1;
       i32 = inst32_rformat::new_rformat(my_decoder, ADD, rd , rs1, rs2);
-      i32.cycle = cycle;
+      i32.m_cycle = cycle;
       commit_inst(i32);
       //`BREADCRUMB(i32.to_string());                      
 
@@ -169,7 +169,7 @@ module inst_history_unit_test;
       rs1 = cycle+1-3; //RAW w/ the the SUB 3 cycles ago
       rs2 = cycle+1;
       i32 = inst32_rformat::new_rformat(my_decoder, ADD, rd , rs1, rs2);
-      i32.cycle = cycle;
+      i32.m_cycle = cycle;
       commit_inst(i32);
       
       obs_cov = my_inst_history.m_raw_hazard_examiner.get_cross_cov();
@@ -182,7 +182,7 @@ module inst_history_unit_test;
       rs1 = cycle+1-2; //RAW w/ the ADD 2 cycles ago
       rs2 = cycle+1-2; //RAW w/ the ADD 2 cycles ago
       i32 = inst32_rformat::new_rformat(my_decoder, XOR, rd , rs1, rs2);
-      i32.cycle = cycle;
+      i32.m_cycle = cycle;
       commit_inst(i32);
       
       obs_cov = my_inst_history.m_raw_hazard_examiner.get_cross_cov();

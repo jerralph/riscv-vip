@@ -37,7 +37,7 @@ class decoder;
   static function int unsigned calc_num_parcels(bit[15:0] parcel0);
     if (parcel0[1:0] != 2'b11) begin
       return 1;
-    end else if (parcel0[5:2] != 3'b111) begin
+    end else if (parcel0[4:2] != 3'b111) begin
       return 2;
     end else if (m_strict) begin
       $fatal(1, $psprintf("UNUSPPORTED -- FUTURE, %016h",parcel0));
