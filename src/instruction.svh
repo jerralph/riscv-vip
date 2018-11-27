@@ -100,8 +100,6 @@ virtual class inst32;
     }
     rs2_inst_x_bins : cross rs2_inst_cp, rs2_bins_cp;            
   endgroup
-
-  
   
   covergroup inst_same_regs_cg ();
     inst_cp : coverpoint m_inst_enum;
@@ -153,6 +151,11 @@ virtual class inst32;
     rs2_bins_cg = new();
   endfunction // new        
 
+
+  pure virtual function void  sample_cov();
+
+  //sample_from_subclass() is called from abstract sample_cov(),
+  //defined in the specific class for b,i,j,r,s,u formats
   protected virtual function void sample_from_subclass();
       inst_same_regs_cg.sample();
       rd_bins_cg.sample();
@@ -160,7 +163,6 @@ virtual class inst32;
       rs2_bins_cg.sample();
   endfunction
   
-  pure virtual function void  sample_cov();
   
   //returns bits
   virtual function opcode_t get_opcode();
@@ -425,6 +427,56 @@ class inst32_sformat extends inst32;
     //TODO VR to cross the value of the register with the offset...
   endgroup
 
+
+  //This is very similar to the Store inst32_iformat::mem_cg but the immediates
+  //are encoded differently.  Ideally some of the similarities could be used to
+  //generalize the code. 
+  covergroup mem_cg();
+    byte_inst_cp : coverpoint 1 iff (m_inst_enum == SB){
+      option.weight =0; //only count the cross      
+    }
+    halfw_inst_cp : coverpoint 1 iff (m_inst_enum == SH){
+      bins insts[] = {LH, LHU};
+      option.weight =0; //only count the cross
+    }
+    word_inst_cp : coverpoint 1 iff (m_inst_enum == LW){
+      option.weight =0; //only count the cross      
+    } 
+    byte_offset_align_cp : coverpoint (get_imm() & 'b11) iff (m_inst_enum == SB) {
+      bins basics[] = {0,1,2,3}; 
+      option.weight =0; //only count the cross
+    }
+    halfw_offset_align_cp : coverpoint (get_imm() & 'b11) iff (m_inst_enum == SH) {
+      bins basics[] = {0,2}; 
+      option.weight =0; //only count the cross      
+    }
+    neg_offset_cp : coverpoint 1 iff (signed'(get_imm() < 0)){
+      option.weight =0; //only count the cross            
+    }
+    neg_base_cp : coverpoint 1 iff (has_rs1_val_set() && (signed'(get_rs1_val()) < 0)){
+      option.weight =0; //only count the cross      
+    } 
+    unaligned_base_cp : coverpoint (get_rs1_val() & 'b11) iff (has_rs1_val_set()) {
+      bins basics[] = {1,3}; 
+      option.weight =0; //only count the cross      
+    }    
+    byte_offsets_cross : cross byte_inst_cp, byte_offset_align_cp, neg_offset_cp {
+      ignore_bins ignore_neg_zero = binsof(byte_offset_align_cp) intersect {0} && binsof(neg_offset_cp);                        
+    }
+    halfw_offsets_cross : cross halfw_inst_cp, halfw_offset_align_cp, neg_offset_cp {
+      ignore_bins ignore_neg_zero = binsof(halfw_offset_align_cp) intersect {0} && binsof(neg_offset_cp);                        
+    }
+    word_offset_cross : cross word_inst_cp, neg_offset_cp;
+    byte_neg_base_cross : cross byte_inst_cp, neg_base_cp;
+    halfw_neg_base_cross : cross halfw_inst_cp, neg_base_cp;
+    word_neg_base_cross : cross word_inst_cp, neg_base_cp;
+    byte_unaligned_base_cross : cross byte_inst_cp, unaligned_base_cp;
+    halfw_unaligned_base_cross : cross halfw_inst_cp, unaligned_base_cp;
+    word_unaligned_base_cross : cross word_inst_cp, unaligned_base_cp;    
+
+  endgroup
+
+
   //Note the lifecycle of this is only meant for one instruction at a time.
   //Each instruction should be new()
   function new(inst_t inst);     
@@ -597,7 +649,6 @@ class inst32_iformat extends inst32;
     return i32i;    
 
   endfunction
- 
   
   static function shamt_t get_shamt_from_imm(imm_low_t imm);
     return imm[SHAMT_W-1:0];    
@@ -636,16 +687,18 @@ class inst32_iformat extends inst32;
     //TODO VR to cross the value of the register with the offset...
   endgroup
 
+
+  //This is very similar to the Store inst32_sformat::mem_cg but the immediates
+  //are encoded differently.  Ideally some of the similarities could be used to
+  //generalize the code. 
   covergroup mem_cg();
     byte_inst_cp : coverpoint m_inst_enum iff (m_inst_enum inside {LB, LBU}){
       bins insts[] = {LB, LBU};
-      option.weight =0; //only count the cross
-      
+      option.weight =0; //only count the cross      
     }
     halfw_inst_cp : coverpoint m_inst_enum iff (m_inst_enum inside {LH, LHU}){
       bins insts[] = {LH, LHU};
       option.weight =0; //only count the cross
-
     }
     word_inst_cp : coverpoint 1 iff (m_inst_enum == LW){
       option.weight =0; //only count the cross      
@@ -661,7 +714,7 @@ class inst32_iformat extends inst32;
     neg_offset_cp : coverpoint 1 iff (m_inst_enum inside {LB,LBU,LH,LHU,LW} && signed'(get_imm() < 0)){
       option.weight =0; //only count the cross            
     }
-    neg_base_cp : coverpoint 1 iff (m_inst_enum inside {LB,LBU,LH,LHU,LW} && has_rs1_val_set() && signed'(get_rs1_val()) < 0){
+    neg_base_cp : coverpoint 1 iff (m_inst_enum inside {LB,LBU,LH,LHU,LW} && has_rs1_val_set() && (signed'(get_rs1_val()) < 0)){
       option.weight =0; //only count the cross      
     } 
     unaligned_base_cp : coverpoint (get_rs1_val() & 'b11) iff (has_rs1_val_set() && m_inst_enum inside {LB,LBU,LH,LHU,LW}) {
