@@ -144,12 +144,22 @@ virtual class inst32;
     }
 
   endgroup
-  
+    
   function new(inst_t inst);
     m_inst = inst;      
     inst_same_regs_cg = new();
+    rd_bins_cg = new();
+    rs1_bins_cg = new();
+    rs2_bins_cg = new();
   endfunction // new        
 
+  protected virtual function void sample_from_subclass();
+      inst_same_regs_cg.sample();
+      rd_bins_cg.sample();
+      rs1_bins_cg.sample();
+      rs2_bins_cg.sample();
+  endfunction
+  
   pure virtual function void  sample_cov();
   
   //returns bits
@@ -224,8 +234,6 @@ virtual class inst32;
   virtual function bit has_rs2();
     return (m_rvg_format inside {B,S,R});
   endfunction // has_rs2
-
-
 
   virtual function reg_id_t get_rs2();
     assert(has_rs2()) else $fatal(1);      
@@ -426,7 +434,7 @@ class inst32_sformat extends inst32;
   endfunction // new
 
   virtual function void sample_cov();
-    super.inst_same_regs_cg.sample();
+    super.sample_from_subclass();
     imm_cg.sample();
   endfunction
 
@@ -515,7 +523,7 @@ class inst32_rformat extends inst32;
   endfunction // get_imm_string
 
   virtual function void sample_cov();
-    super.inst_same_regs_cg.sample();
+    super.sample_from_subclass();
   endfunction 
 
   virtual function funct7_t get_funct7();
@@ -628,16 +636,67 @@ class inst32_iformat extends inst32;
     //TODO VR to cross the value of the register with the offset...
   endgroup
 
+  covergroup mem_cg();
+    byte_inst_cp : coverpoint m_inst_enum iff (m_inst_enum inside {LB, LBU}){
+      bins insts[] = {LB, LBU};
+      option.weight =0; //only count the cross
+      
+    }
+    halfw_inst_cp : coverpoint m_inst_enum iff (m_inst_enum inside {LH, LHU}){
+      bins insts[] = {LH, LHU};
+      option.weight =0; //only count the cross
+
+    }
+    word_inst_cp : coverpoint 1 iff (m_inst_enum == LW){
+      option.weight =0; //only count the cross      
+    } 
+    byte_offset_align_cp : coverpoint (get_imm() & 'b11) iff (m_inst_enum inside {LB, LBU}) {
+      bins basics[] = {0,1,2,3}; 
+      option.weight =0; //only count the cross
+    }
+    halfw_offset_align_cp : coverpoint (get_imm() & 'b11) iff (m_inst_enum inside {LH, LHU}) {
+      bins basics[] = {0,2}; 
+      option.weight =0; //only count the cross      
+    }
+    neg_offset_cp : coverpoint 1 iff (m_inst_enum inside {LB,LBU,LH,LHU,LW} && signed'(get_imm() < 0)){
+      option.weight =0; //only count the cross            
+    }
+    neg_base_cp : coverpoint 1 iff (m_inst_enum inside {LB,LBU,LH,LHU,LW} && has_rs1_val_set() && signed'(get_rs1_val()) < 0){
+      option.weight =0; //only count the cross      
+    } 
+    unaligned_base_cp : coverpoint (get_rs1_val() & 'b11) iff (has_rs1_val_set() && m_inst_enum inside {LB,LBU,LH,LHU,LW}) {
+      bins basics[] = {1,3}; 
+      option.weight =0; //only count the cross      
+    }    
+    byte_offsets_cross : cross byte_inst_cp, byte_offset_align_cp, neg_offset_cp {
+      ignore_bins ignore_neg_zero = binsof(byte_offset_align_cp) intersect {0} && binsof(neg_offset_cp);                        
+    }
+    halfw_offsets_cross : cross halfw_inst_cp, halfw_offset_align_cp, neg_offset_cp {
+      ignore_bins ignore_neg_zero = binsof(halfw_offset_align_cp) intersect {0} && binsof(neg_offset_cp);                        
+    }
+    word_offset_cross : cross word_inst_cp, neg_offset_cp;
+    byte_neg_base_cross : cross byte_inst_cp, neg_base_cp;
+    halfw_neg_base_cross : cross halfw_inst_cp, neg_base_cp;
+    word_neg_base_cross : cross word_inst_cp, neg_base_cp;
+    byte_unaligned_base_cross : cross byte_inst_cp, unaligned_base_cp;
+    halfw_unaligned_base_cross : cross halfw_inst_cp, unaligned_base_cp;
+    word_unaligned_base_cross : cross word_inst_cp, unaligned_base_cp;    
+
+  endgroup
+  
+  
   
   function new(inst_t inst);     
     super.new(inst);  
     m_rvg_format = I;   
-    imm_cg = new(get_imm(), get_inst_enum());    
+    imm_cg = new(get_imm(), get_inst_enum());
+    mem_cg = new();
   endfunction			   
 
   virtual function void sample_cov();
-    super.inst_same_regs_cg.sample();    
+    super.sample_from_subclass();    
     imm_cg.sample();
+    mem_cg.sample();
   endfunction
 
   virtual function bit is_shamt();
@@ -758,7 +817,7 @@ class inst32_bformat extends inst32;
   endfunction      
 
   virtual function void sample_cov();
-    super.inst_same_regs_cg.sample();    
+    super.sample_from_subclass();
     imm_cg.sample();
   endfunction
   
@@ -822,7 +881,7 @@ class inst32_uformat extends inst32;
   endfunction		
 
   virtual function void sample_cov();
-    super.inst_same_regs_cg.sample();
+    super.sample_from_subclass();    
     imm_cg.sample();
   endfunction
 
@@ -892,7 +951,7 @@ class inst32_jformat extends inst32;
   endfunction
 
   virtual function void sample_cov();
-    super.inst_same_regs_cg.sample();
+    super.sample_from_subclass();
     imm_cg.sample();
   endfunction // sample_cov
 
