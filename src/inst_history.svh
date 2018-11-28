@@ -115,7 +115,7 @@ class raw_hazard_examiner;
   //for no check keep it as is.  Beware of moving the sample out of this
   //method.  Sample is be called multiple times per cycle as the current 
   //instruction is scanned against historical instructions.
-  virtual function post_examine();
+  virtual function void post_examine();
       raw_cg.sample();  
   endfunction
 
