@@ -63,7 +63,7 @@ class monitored_regfile extends regfile;
   endtask 
 
   virtual protected task do_monitor();
-    @(negedge m_vif.rstn);
+    @(posedge m_vif.rstn);
     forever begin
       @(posedge m_vif.clk iff m_x_regfile_array !== m_vif.x);         
       //could just assign m_x_regfile_array to m_vif.x but may at some point

@@ -62,9 +62,9 @@ module regfile_unit_test;
     my_csrs.set_m_vif(csr_if);
     //Toggle reset
     clk = 0;
-    rstn = 1;
-    #1
     rstn = 0;
+    #1
+    rstn = 1;
 
   endtask
 

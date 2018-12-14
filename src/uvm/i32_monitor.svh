@@ -63,7 +63,7 @@ class i32_monitor extends uvm_monitor;
   virtual protected task do_monitor();
     event  do_trasact_e;
     
-    @(negedge m_vi.rstn);
+    @(posedge m_vi.rstn);
     //Two processes synced with an event to overcome race possibility
     //between posedge clk for i32_monitor and monitored_regfile in
     //grabbing register file values for decoded instruction

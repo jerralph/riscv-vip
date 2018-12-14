@@ -393,7 +393,7 @@ module inst32_unit_test;
      //Prove out a fix to the way store instructions are printed
      inst32 i32;
      string obs;
-     string expected = "0055a023 S SW X5, 0(X11)";
+     string expected = "0 0055a023 S SW X5, 0(X11)";
      i32 = my_decoder.decode_inst32(32'h0055a023);
      obs = i32.to_string();
 
@@ -401,7 +401,7 @@ module inst32_unit_test;
 
      i32 = inst32_sformat::new_from_funct3_imm(my_decoder, 3'b001, -9);
      obs = i32.to_string();
-     expected = "fe001ba3 S SH X0, -9(X0)";   
+     expected = "0 fe001ba3 S SH X0, -9(X0)";   
      `FAIL_UNLESS_LOG( obs == expected  ,$psprintf("obs %s, expected %s",obs,expected))
    
   `SVTEST_END                                                              

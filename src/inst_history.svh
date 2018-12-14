@@ -94,13 +94,13 @@ class raw_hazard_examiner;
       //set the read after write (RAW) register source case
       //used for the coverage cross
       case ({rs1_raw,rs2_raw})
-        {1'b1,1'b0} : begin
+        {2'b10} : begin
           raw_rs_case = RS1_ONLY;
         end
-        {1'b0,1'b1} : begin
+        {2'b01} : begin
           raw_rs_case = RS2_ONLY;
         end
-        {1'b1,1'b1} : begin
+        {2'b11} : begin
           raw_rs_case = RS1AND2;
         end
         default : begin

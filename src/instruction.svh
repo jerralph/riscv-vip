@@ -37,7 +37,7 @@ endclass // inst16
  */
 virtual class inst32;
   
-  int unsigned m_cycle;  //The clock cycle associated with commit of the instruction
+  int unsigned m_cycle;  //The clock cycle associated with retirement of the instruction
   rand inst_t  m_inst;
   rvg_format_t m_rvg_format  = UNKNOWN;
   protected inst_enum_t  m_inst_enum;
@@ -243,8 +243,9 @@ virtual class inst32;
   endfunction    
 
   //Set the value of the rs2 register referenced by the instruction.
-  //This is generally the value of x[rs2] at the when the instruction in at the 
-  //decode stage of the pipeline.  For data hazards the value may be different 
+  //Beware using this with data hazards.  For a 2 stage pipeline with this
+  //set at retirement of the instruction the value from the regfile should
+  //be good.
   virtual function void set_rs2_val(xlen_t val);
     assert(has_rs2()) else $fatal(1);      
     m_rs2_val_set = 1;
@@ -327,17 +328,22 @@ virtual class inst32;
     inst_enum_t iet = get_inst_enum();    
     return iet.name();
   endfunction
-  
-  virtual function string to_string();
+
+  protected function string string_base();
     string rvg_format_str;
+    rvg_format_str = m_rvg_format.name();
+    return $psprintf("%0d %08H %s ", m_cycle, m_inst, rvg_format_str);	
+  endfunction
+
+
+  virtual function string to_string();
     //string str = $psprintf("%032b %s ", m_inst, rvg_format_str);
-    string str;
+    string str = string_base();
     string rs_vals ="";
     reg_id_t rd, rs1, rs2;
     xlen_t rs1_val, rs2_val;
 
-    rvg_format_str = m_rvg_format.name();
-    str = $psprintf("%0d %08H %s ", m_cycle, m_inst, rvg_format_str);
+    str = string_base();  //common string chunk used by specialized overrides 
 
     str={str,get_name_string()," "};
     if (has_rd())  begin
@@ -512,12 +518,12 @@ class inst32_sformat extends inst32;
     return m_inst.s_inst.funct3;
   endfunction
 
+
   //Store instructions are a bit non-standard in assembly representation
   //override the base class's defintion
   //Assembly is: sh rs2, offset(rs1)
   virtual function string to_string();
-    string rvg_format_str = m_rvg_format.name();
-    string str = $psprintf("%08H %s ", m_inst, rvg_format_str);
+	string str = string_base();
     reg_id_t rs1 = get_rs1();
     reg_id_t rs2 = get_rs2();    
     str={str,get_name_string()," "};

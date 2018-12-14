@@ -67,9 +67,9 @@ module csrs_unit_test;
     
     //Toggle reset
     clk = 0;
-    rstn = 1;
-    #1
     rstn = 0;
+    #1
+    rstn = 1;
 
   endtask
 

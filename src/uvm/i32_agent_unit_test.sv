@@ -127,9 +127,9 @@ module i32_agent_unit_test;
     uvm_top.print_topology();
     /* Place Setup Code Here */
     clk = 0;
-    rstn = 1;
-    #1
     rstn = 0;
+    #1
+    rstn = 1;
     svunit_activate_uvm_component(my_i32_agent_wrapper);
 
     //-----------------------------
