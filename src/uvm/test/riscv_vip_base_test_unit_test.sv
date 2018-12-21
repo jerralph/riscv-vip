@@ -76,14 +76,11 @@ module riscv_vip_base_test_unit_test;
 
   //regfile interface
   riscv_vip_regfile_if regfile_if(.*);
-  monitored_regfile my_regfile = new();
 
   //CSR interface
   //simulator for some reason doesn't like a null virtual interface in the csrs class
   //this solves this...
   riscv_vip_csr_if csr_if(.*);
-  monitored_csrs my_csrs = new();
-
 
    
   //===================================
@@ -109,6 +106,13 @@ module riscv_vip_base_test_unit_test;
       regfile_if
       );
 
+    uvm_config_db#(virtual riscv_vip_csr_if)::set(
+      my_test, 
+      "m_uvc_env.m_i32_agent[0]", 
+      "m_csr_vi",
+      csr_if
+      );
+
     uvm_config_db#(int)::set(
       my_test,
       "m_uvc_env.m_i32_agent[0]",
@@ -125,15 +129,12 @@ module riscv_vip_base_test_unit_test;
   //===================================
   task setup();
     svunit_ut.setup();
-    my_csrs.set_m_vif(csr_if);
-    my_regfile.set_m_vif(regfile_if);  
-
     
     /* Place Setup Code Here */
     clk = 0;
-    rstn = 1;
-    #1
     rstn = 0;
+    #1
+    rstn = 1;
 
 
     

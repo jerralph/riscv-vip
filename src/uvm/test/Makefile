@@ -22,17 +22,19 @@
 
 
 
-SIMR := modelsim  # default, can be overriden at runtime: make inst_ut SIMR=ius
+SIMR := modelsim
 #SIMR := ius
 
-
+ifeq ($(SIMR), modelsim)
+SIMR_ARGS := -c_arg +cover -r "-do riscv_vip.do"
+endif
 ifeq ($(SIMR), ius)
 SIMR_ARGS := -c_arg "-coverage all -covoverwrite"
 endif
 
 
 test_ut:
-	runSVUnit -uvm -t riscv_vip_base_test_unit_test.sv -s $(SIMR)  -f riscv_vip_test.f
+	runSVUnit -uvm -t riscv_vip_base_test_unit_test.sv -s $(SIMR) -f riscv_vip_test.f $(SIMR_ARGS)
 
 clean:
 	rm -Rf work/*
