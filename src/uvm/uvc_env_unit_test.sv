@@ -74,9 +74,7 @@ module uvc_env_unit_test;
 
   //CSR and regfile stuff
   riscv_vip_regfile_if regfile_if(.*);
-  monitored_regfile my_regfile = new();
   riscv_vip_csr_if csr_if(.*);
-  monitored_csrs my_csrs = new();
 
 
    
@@ -90,12 +88,10 @@ module uvc_env_unit_test;
 
     uvm_config_db#(virtual riscv_vip_inst_if)::set(my_uvc_env, "m_i32_agent[0]", "m_vi",my_if);
     uvm_config_db#(virtual riscv_vip_regfile_if)::set(uvm_root::get(), "", "m_rf_vi",regfile_if);
+    uvm_config_db#(virtual riscv_vip_csr_if)::set(uvm_root::get(), "", "m_csr_vi",csr_if);
+
     uvm_config_db#(int)::set(my_uvc_env, "m_i32_agent[0]", "m_core_id",199);     
-    
-    my_csrs.set_m_vif(csr_if);
-    my_regfile.set_m_vif(regfile_if);    
-    
-    
+        
     svunit_deactivate_uvm_component(my_uvc_env);
   endfunction
 
