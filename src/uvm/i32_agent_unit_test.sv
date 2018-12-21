@@ -93,7 +93,6 @@ module i32_agent_unit_test;
   //CSR and regfile stuff
   riscv_vip_regfile_if regfile_if(.*);
   riscv_vip_csr_if csr_if(.*);
-  monitored_csrs my_csrs = new();  //placeholder... 
 
 
   //===================================
@@ -107,6 +106,8 @@ module i32_agent_unit_test;
     
     uvm_config_db#(virtual riscv_vip_inst_if)::set(uvm_root::get(), "", "m_vi",my_if);
     uvm_config_db#(virtual riscv_vip_regfile_if)::set(uvm_root::get(), "", "m_rf_vi",regfile_if);
+    uvm_config_db#(virtual riscv_vip_csr_if)::set(uvm_root::get(), "", "m_csr_vi",csr_if);
+
 
     uvm_config_db#(int)::set(uvm_root::get(), "", "m_core_id",99);     
         
@@ -119,10 +120,6 @@ module i32_agent_unit_test;
   //===================================
   task setup();
     svunit_ut.setup();
-
-    my_csrs.set_m_vif(csr_if);
-    //my_regfile.set_m_vif(regfile_if);    
-
 
     uvm_top.print_topology();
     /* Place Setup Code Here */
