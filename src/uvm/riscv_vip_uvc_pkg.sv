@@ -36,7 +36,9 @@ package riscv_vip_uvc_pkg;
   import riscv_vip_pkg::*;
   import riscv_vip_class_pkg::*;
 
-  `include "i32_item.svh"
+  // Deprecated - Instead use inst32
+  //`include "i32_item.svh" 
+
   `include "i32_monitor.svh"
   `include "i32_agent.svh"
   `include "i32_cov_subscriber.svh"

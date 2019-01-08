@@ -26,7 +26,8 @@ SIMR := modelsim
 #SIMR := ius
 
 ifeq ($(SIMR), modelsim)
-SIMR_ARGS := -c_arg +cover -r "-do riscv_vip.do"
+#SIMR_ARGS := -c_arg +cover -r "-do riscv_vip.do"
+SIMR_ARGS := -c_arg +cover -r "log -r; coverage save -onexit -assert -directive -cvg -codeAll ./riscv_vip_uvm.ucdb" #MSHA
 endif
 ifeq ($(SIMR), ius)
 SIMR_ARGS := -c_arg "-coverage all -covoverwrite"
@@ -35,6 +36,9 @@ endif
 
 test_ut:
 	runSVUnit -uvm -t riscv_vip_base_test_unit_test.sv -s $(SIMR) -f riscv_vip_test.f $(SIMR_ARGS)
+
+cov:
+	vsim -gui -viewcov riscv_vip_uvm.ucdb
 
 clean:
 	rm -Rf work/*
