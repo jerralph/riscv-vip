@@ -87,7 +87,7 @@ virtual class inst32;
 
   covergroup rs2_bins_cg();
     rs2_inst_cp : coverpoint m_inst_enum {
-      bins ignore_has_no_rs2 = {`INSTS_W_RS2_LIST};
+      ignore_bins ignore_has_no_rs2 = {`INSTS_W_RS2_LIST};
     }
     rs2_bins_cp : coverpoint get_rs2() iff ( has_rs2() ){
       bins zero = {X0};
