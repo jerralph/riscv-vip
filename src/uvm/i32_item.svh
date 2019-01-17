@@ -32,17 +32,19 @@ class i32_item extends uvm_sequence_item;
   `uvm_object_utils_begin(i32_item)
   `uvm_object_utils_end
 
-  function new(string name ="i32_item");
-    super.new(name);
-  endfunction // new
-
-  virtual function void do_print(uvm_printer printer);
-    printer.print_int("m_addr",m_addr,$bits(m_addr));
-    printer.print_string("m_inst",m_inst.to_string());    
-  endfunction
-     
+  extern function new(string name = "i32_item");
+  extern function void do_print(uvm_printer printer);
   
-endclass
+endclass: i32_item
+
+function i32_item::new(string name ="i32_item");
+  super.new(name);
+endfunction // new
+
+function void i32_item::do_print(uvm_printer printer);
+  printer.print_int("m_addr",m_addr,$bits(m_addr));
+  printer.print_string("m_inst",m_inst.to_string());    
+endfunction
     
   
 `endif

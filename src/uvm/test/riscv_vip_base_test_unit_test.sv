@@ -82,6 +82,10 @@ module riscv_vip_base_test_unit_test;
   //this solves this...
   riscv_vip_csr_if csr_if(.*);
 
+  // MSHA: To show timeunit in `uvm_info
+  //initial begin
+  //  $timeformat(-9,0," ns",2);
+  //end
    
   //===================================
   // Build
@@ -101,14 +105,16 @@ module riscv_vip_base_test_unit_test;
 
     uvm_config_db#(virtual riscv_vip_regfile_if)::set(
       my_test, 
-      "m_uvc_env.m_i32_agent[0]", 
+      //"m_uvc_env.m_i32_agent[0]", // MSHA  
+      "m_uvc_env.*", 
       "m_rf_vi",
       regfile_if
       );
 
     uvm_config_db#(virtual riscv_vip_csr_if)::set(
       my_test, 
-      "m_uvc_env.m_i32_agent[0]", 
+      //"m_uvc_env.m_i32_agent[0]", // MSHA  
+      "m_uvc_env.*", 
       "m_csr_vi",
       csr_if
       );
@@ -135,7 +141,6 @@ module riscv_vip_base_test_unit_test;
     rstn = 0;
     #1
     rstn = 1;
-
 
     
     svunit_activate_uvm_component(my_test);
@@ -189,7 +194,8 @@ module riscv_vip_base_test_unit_test;
   `SVTEST(see_some_coverage)    
 
 
-    inst32_iformat i32i = new(0);     
+    //inst32_iformat i32i = new(0);     
+    inst32_iformat i32i = new("i32i");// MSHA      
    
     const logic [31:0] pc_insts [][2] = '{
          {4,  	          i_inst_t'{imm:'hFF  ,rs1:1,   funct3:2,   rd:5, op:SYSTEM}}	// I CSRRS	

@@ -1,5 +1,4 @@
-
-//###############################################################
+//  ###########################################################################
 //
 //  Licensed to the Apache Software Foundation (ASF) under one
 //  or more contributor license agreements.  See the NOTICE file
@@ -8,9 +7,9 @@
 //  to you under the Apache License, Version 2.0 (the
 //  "License"); you may not use this file except in compliance
 //  with the License.  You may obtain a copy of the License at
-//  
+//
 //  http://www.apache.org/licenses/LICENSE-2.0
-//  
+//
 //  Unless required by applicable law or agreed to in writing,
 //  software distributed under the License is distributed on an
 //  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,9 +17,7 @@
 //  specific language governing permissions and limitations
 //  under the License.
 //
-//###############################################################
-
-
+//  ########################################################################### 
 
 `include "svunit_defines.svh"
 `include "svunit_uvm_mock_pkg.sv"
@@ -61,7 +58,6 @@ module uvc_env_unit_test;
   string name = "uvc_env_ut";
   svunit_testcase svunit_ut; 
 
-
   //===================================
   // This is the UUT that we're 
   // running the Unit Tests on
@@ -76,7 +72,10 @@ module uvc_env_unit_test;
   riscv_vip_regfile_if regfile_if(.*);
   riscv_vip_csr_if csr_if(.*);
 
-
+  // MSHA: To show timeunit in `uvm_info
+  //initial begin
+  //  $timeformat(-9,0," ns",2);
+  //end
    
   //===================================
   // Build
@@ -91,7 +90,7 @@ module uvc_env_unit_test;
     uvm_config_db#(virtual riscv_vip_csr_if)::set(uvm_root::get(), "", "m_csr_vi",csr_if);
 
     uvm_config_db#(int)::set(my_uvc_env, "m_i32_agent[0]", "m_core_id",199);     
-        
+    
     svunit_deactivate_uvm_component(my_uvc_env);
   endfunction
 
@@ -158,7 +157,8 @@ module uvc_env_unit_test;
   `SVTEST(see_some_coverage)    
 
 
-    inst32_iformat i32i = new(0);     
+    //inst32_iformat i32i = new(0);     
+    inst32_iformat i32i = new("i32i");// MSHA      
    
     const logic [31:0] pc_insts [][2] = '{
          {4,  	          i_inst_t'{imm:'hFF  ,rs1:1,   funct3:2,   rd:5, op:SYSTEM}}	// I CSRRS	
@@ -173,6 +173,9 @@ module uvc_env_unit_test;
    foreach(pc_insts[i,]) begin
      my_if.curr_pc = pc_insts[i][0];
      my_if.curr_inst = pc_insts[i][1];
+     // MSHA 
+      regfile_if.x[1] = i+1;      //gpr x[1] val
+      regfile_if.x[2] = 100+i+1;  //gpr x[2] val
      toggle_clock();
    end
 

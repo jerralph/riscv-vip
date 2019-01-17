@@ -1,5 +1,4 @@
-
-//###############################################################
+//  ###########################################################################
 //
 //  Licensed to the Apache Software Foundation (ASF) under one
 //  or more contributor license agreements.  See the NOTICE file
@@ -8,9 +7,9 @@
 //  to you under the Apache License, Version 2.0 (the
 //  "License"); you may not use this file except in compliance
 //  with the License.  You may obtain a copy of the License at
-//  
+//
 //  http://www.apache.org/licenses/LICENSE-2.0
-//  
+//
 //  Unless required by applicable law or agreed to in writing,
 //  software distributed under the License is distributed on an
 //  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,9 +17,7 @@
 //  specific language governing permissions and limitations
 //  under the License.
 //
-//###############################################################
-
-
+//  ########################################################################### 
 
 `include "svunit_defines.svh"
 `include "svunit_uvm_mock_pkg.sv"
@@ -35,10 +32,18 @@ import svunit_uvm_mock_pkg::*;
 
 class i32_agent_wrapper extends i32_agent;
   `uvm_component_utils(i32_agent_wrapper)  
-  uvm_analysis_imp#(i32_item,i32_agent_wrapper) m_imp;
+  uvm_analysis_imp#(inst32,i32_agent_wrapper) m_imp;
+
+  //---------------------------------------------
+  // MSHA: Just for agent_unit test
+  //---------------------------------------------
+  reg_fetcher         m_reg_fetcher; 
+  decoder             m_decoder;  
+  regfile rg; 
+  //---------------------------------------------
 
   int m_write_cnt = 0;
-  i32_item m_item;
+  inst32 m_item;
   
   function new(string name = "i32_agent_wrapper", uvm_component parent);
     super.new(name, parent);
@@ -49,9 +54,16 @@ class i32_agent_wrapper extends i32_agent;
   // Build
   //===================================
   function void build_phase(uvm_phase phase);
-     super.build_phase(phase);
-     /* Place Build Code Here */
-
+    super.build_phase(phase);
+    /* Place Build Code Here */
+    //---------------------------------------------
+    // MSHA: Just for agent_unit test
+    //---------------------------------------------
+    m_reg_fetcher = reg_fetcher::type_id::create("m_reg_fetcher",this);
+    m_decoder = decoder::type_id::create("m_decoder",this);
+    rg = regfile::type_id::create("rg");
+    uvm_config_db#(regfile)::set(this, "*", "regfile",rg);
+    //---------------------------------------------
   endfunction
 
   //==================================
@@ -61,17 +73,23 @@ class i32_agent_wrapper extends i32_agent;
      super.connect_phase(phase);
 
      m_mon_ap.connect(m_imp);
-
+    //---------------------------------------------
+    // MSHA: Just for agent_unit test
+    //---------------------------------------------
+    m_monitor.put_port.connect(m_reg_fetcher.put_port);
+    m_monitor.trans_port_inst32.connect(m_decoder.trans_export_inst32);
+    //---------------------------------------------
   endfunction // connect_phase
 
   // Mock write method that simply captures the pkt
-  function void write(i32_item item);
+  function void write(inst32 item);
     m_write_cnt++;
     m_item = item;
   endfunction
 
 endclass
 
+//`timescale 1ns/1ps 
 
 module i32_agent_unit_test;
   import svunit_pkg::svunit_testcase;
@@ -93,7 +111,14 @@ module i32_agent_unit_test;
   //CSR and regfile stuff
   riscv_vip_regfile_if regfile_if(.*);
   riscv_vip_csr_if csr_if(.*);
+  // MSHA: This is not required here as the
+  // creation is done in env
+  // monitored_csrs my_csrs = new();//placeholder... 
 
+  // MSHA: To show timeunit in `uvm_info
+  //initial begin
+  //  $timeformat(-9,5," ns",10);
+  //end
 
   //===================================
   // Build
@@ -107,7 +132,6 @@ module i32_agent_unit_test;
     uvm_config_db#(virtual riscv_vip_inst_if)::set(uvm_root::get(), "", "m_vi",my_if);
     uvm_config_db#(virtual riscv_vip_regfile_if)::set(uvm_root::get(), "", "m_rf_vi",regfile_if);
     uvm_config_db#(virtual riscv_vip_csr_if)::set(uvm_root::get(), "", "m_csr_vi",csr_if);
-
 
     uvm_config_db#(int)::set(uvm_root::get(), "", "m_core_id",99);     
         
@@ -170,7 +194,7 @@ module i32_agent_unit_test;
   `SVUNIT_TESTS_BEGIN
 
   `SVTEST(some_insts)    
-    i32_item i32, last_i32;
+    inst32 i32, last_i32;
     inst32 l_inst32;
     int item_cnt;
    
@@ -193,13 +217,13 @@ module i32_agent_unit_test;
 
       //Check the ap
       i32 = my_i32_agent_wrapper.m_item;
-      l_inst32 = i32.m_inst;
+      l_inst32 = i32;
       item_cnt = my_i32_agent_wrapper.m_write_cnt;
-      //i32.print();
+      i32.print();
       `FAIL_UNLESS(i32 != last_i32);    //ensure a fresh item is created by the monitor
       `FAIL_UNLESS(i32.m_addr == pc_insts[i][0]);
-      `FAIL_UNLESS(i32.m_inst_bits == pc_insts[i][1]);
-      `FAIL_UNLESS(i32.m_inst.m_inst == pc_insts[i][1]);
+      `FAIL_UNLESS(i32.m_inst == pc_insts[i][1]);
+
       if (l_inst32.has_rs1()) begin        
         if( l_inst32.get_rs1() == 1) begin
           `FAIL_UNLESS_LOG(l_inst32.get_rs1_val() === i, $psprintf("i is %0d",i));
