@@ -23,7 +23,7 @@
 `define _DECODER_INCLUDE_
 
 //-----------------------------------------------------------------------------
-// Class: Decoder
+// Class: decoder
 // Decode bits into a verif object model
 //-----------------------------------------------------------------------------
 class decoder extends uvm_component;

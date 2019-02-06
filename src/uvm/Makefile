@@ -39,5 +39,8 @@ agent_ut:
 env_ut:
 	runSVUnit -uvm -t uvc_env_unit_test.sv -s $(SIMR) -f riscv_vip_uvc.f $(SIMR_ARGS)
 
+i32s_ut:
+	runSVUnit -uvm -t sv_to_uvm/inst32_sformat_unit_test.sv -s $(SIMR) -f riscv_vip_uvc.f $(SIMR_ARGS)
+
 clean:
 	rm -Rf work/*

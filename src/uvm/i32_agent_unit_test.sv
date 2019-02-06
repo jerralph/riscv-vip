@@ -33,15 +33,9 @@ import svunit_uvm_mock_pkg::*;
 class i32_agent_wrapper extends i32_agent;
   `uvm_component_utils(i32_agent_wrapper)  
   uvm_analysis_imp#(inst32,i32_agent_wrapper) m_imp;
-
-  //---------------------------------------------
-  // MSHA: Just for agent_unit test
-  //---------------------------------------------
   reg_fetcher         m_reg_fetcher; 
   decoder             m_decoder;  
   regfile rg; 
-  //---------------------------------------------
-
   int m_write_cnt = 0;
   inst32 m_item;
   
@@ -55,30 +49,20 @@ class i32_agent_wrapper extends i32_agent;
   //===================================
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
-    /* Place Build Code Here */
-    //---------------------------------------------
-    // MSHA: Just for agent_unit test
-    //---------------------------------------------
     m_reg_fetcher = reg_fetcher::type_id::create("m_reg_fetcher",this);
     m_decoder = decoder::type_id::create("m_decoder",this);
     rg = regfile::type_id::create("rg");
     uvm_config_db#(regfile)::set(this, "*", "regfile",rg);
-    //---------------------------------------------
   endfunction
 
   //==================================
   // Connect
   //=================================
   function void connect_phase(uvm_phase phase);
-     super.connect_phase(phase);
-
-     m_mon_ap.connect(m_imp);
-    //---------------------------------------------
-    // MSHA: Just for agent_unit test
-    //---------------------------------------------
+    super.connect_phase(phase);
+    m_mon_ap.connect(m_imp);
     m_monitor.put_port.connect(m_reg_fetcher.put_port);
     m_monitor.trans_port_inst32.connect(m_decoder.trans_export_inst32);
-    //---------------------------------------------
   endfunction // connect_phase
 
   // Mock write method that simply captures the pkt
@@ -88,8 +72,6 @@ class i32_agent_wrapper extends i32_agent;
   endfunction
 
 endclass
-
-//`timescale 1ns/1ps 
 
 module i32_agent_unit_test;
   import svunit_pkg::svunit_testcase;
@@ -111,14 +93,6 @@ module i32_agent_unit_test;
   //CSR and regfile stuff
   riscv_vip_regfile_if regfile_if(.*);
   riscv_vip_csr_if csr_if(.*);
-  // MSHA: This is not required here as the
-  // creation is done in env
-  // monitored_csrs my_csrs = new();//placeholder... 
-
-  // MSHA: To show timeunit in `uvm_info
-  //initial begin
-  //  $timeformat(-9,5," ns",10);
-  //end
 
   //===================================
   // Build
