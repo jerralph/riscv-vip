@@ -272,20 +272,4 @@ module inst32_iformat_unit_test;
 
   endtask      
 
-  function i_inst_t create_i_inst(imm_low_t _imm,
-                                  regsel_t _rs1,
-                                  funct3_t _funct3,
-                                  regsel_t _rd,
-                                  opcode_t _op);
-    i_inst_t _i_inst;
-
-    _i_inst.imm = _imm;
-    _i_inst.rs1 = _rs1;
-    _i_inst.funct3 = _funct3;
-    _i_inst.rd = _rd;
-    _i_inst.op = _op;
-
-    return _i_inst;
-  endfunction
-
 endmodule
