@@ -22,72 +22,48 @@
 
 
 `include "svunit_defines.svh"
-`include "svunit_uvm_mock_pkg.sv"
 `include "riscv_vip_pkg.sv"
 import uvm_pkg::*;
-`include "riscv_vip_uvc_pkg.sv"
 `include "riscv_vip_unit_test_pkg.sv"
 import riscv_vip_pkg::*;
 import riscv_vip_class_pkg::*;
 import svunit_pkg::*;
-import riscv_vip_uvc_pkg::*;
-import svunit_uvm_mock_pkg::*;
 import riscv_vip_unit_test_pkg::*;
 
 
 module inst32_sformat_unit_test;
   import svunit_pkg::svunit_testcase;
    
-
   string name = "inst32_ut";
   svunit_testcase svunit_ut;
 
-
-  //simulator for some reason doesn't like a null virtual interfaces is classes at inital runtime.
-  //this solves this...
-  //regfile interface
+  //Interface and clock stuff
   logic clk;
   logic rstn; 
-
   riscv_vip_inst_if my_if(.*);
   riscv_vip_regfile_if regfile_if(.*);
   riscv_vip_csr_if csr_if(.*);
 
-  //===================================
-  // This is the UUT that we're 
-  // running the Unit Tests on
-  //===================================
-  inst32 my_inst32;
+  //decoder for creating instructions
   decoder_wrapper my_decoder_wrapper;   
    
-
   //===================================
   // Build
   //===================================
   function void build();
     svunit_ut = new(name);
     my_decoder_wrapper = decoder_wrapper::type_id::create("", null);
-
     uvm_config_db#(virtual riscv_vip_inst_if)::set(uvm_root::get(), "", "m_vi",my_if);
     uvm_config_db#(virtual riscv_vip_regfile_if)::set(uvm_root::get(), "", "m_rf_vi",regfile_if);
     uvm_config_db#(virtual riscv_vip_csr_if)::set(uvm_root::get(), "", "m_csr_vi",csr_if);   
-
   endfunction
-
 
   //===================================
   // Setup for running the Unit Tests
   //===================================
   task setup();
     svunit_ut.setup();
-
-
-    /* Place Setup Code Here */
-//    my_csrs.set_m_vif(csr_if);
-//    my_regfile.set_m_vif(regfile_if);    
-
   endtask
-
 
   //===================================
   // Here we deconstruct anything we 
@@ -95,10 +71,7 @@ module inst32_sformat_unit_test;
   //===================================
   task teardown();
     svunit_ut.teardown();
-    /* Place Teardown Code Here */
-
   endtask
-
 
   //===================================
   // All tests are defined between the
@@ -158,7 +131,10 @@ module inst32_sformat_unit_test;
   
   `SVTEST_END
 
+
   `SVUNIT_TESTS_END
+
+
 
   task automatic test_s_imm(
                       funct3_t funct3,                       

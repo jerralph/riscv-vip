@@ -79,6 +79,28 @@ class decoder_wrapper extends decoder;
 
 endclass
 
+//class riscv_vip_inst32_ut extends svunit_testcase;
+//
+//  static logic clk;
+//  static logic rstn;  
+//  static virtual riscv_vip_inst_if inst_vif;
+//  static virtual riscv_vip_regfile_if rf_vif;
+//  static virtual riscv_vip_csr_if csr_vif;
+//
+//  static function void create_vifs();
+//    inst_vif =  my_if(.*);
+//    riscv_vip_regfile_if regfile_if(.*);
+//    riscv_vip_csr_if csr_if(.*);        
+//  endfunction
+//    
+//  function void build();
+//    my_decoder_wrapper = decoder_wrapper::type_id::create("", null);
+//    uvm_config_db#(virtual riscv_vip_inst_if)::set(uvm_root::get(), "", "m_vi",my_if);
+//    uvm_config_db#(virtual riscv_vip_regfile_if)::set(uvm_root::get(), "", "m_rf_vi",regfile_if);
+//    uvm_config_db#(virtual riscv_vip_csr_if)::set(uvm_root::get(), "", "m_csr_vi",csr_if);   
+//  endfunction    
+//endclass
+//
    
 endpackage: riscv_vip_unit_test_pkg 
 
