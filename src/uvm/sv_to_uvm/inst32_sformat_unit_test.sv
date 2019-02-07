@@ -26,58 +26,13 @@
 `include "riscv_vip_pkg.sv"
 import uvm_pkg::*;
 `include "riscv_vip_uvc_pkg.sv"
+`include "riscv_vip_unit_test_pkg.sv"
 import riscv_vip_pkg::*;
 import riscv_vip_class_pkg::*;
 import svunit_pkg::*;
 import riscv_vip_uvc_pkg::*;
 import svunit_uvm_mock_pkg::*;
-
-
-//-----------------------------------------------------------------------------
-// Class: decoder_wrapper
-// Use the decoder to create the inst32 classes to test. Ideally a unit test
-// should be purely of the class getting tested, stand-alone; however there
-// is quite a bit of coupling between the decoder and the instruction objects
-// the decoder produces. 
-//-----------------------------------------------------------------------------
-
-class decoder_wrapper extends decoder;
-  `uvm_component_utils(decoder_wrapper)  
-  //uvm_analysis_imp#(inst32,i32_agent_wrapper) m_imp;
-  reg_fetcher         m_reg_fetcher; 
-  regfile             m_rf; 
-
-  
-  function new(string name = "i32_agent_wrapper", uvm_component parent);
-    super.new(name, parent);
-    //m_imp = new("m_imp",this);
-  endfunction
-
-  //===================================
-  // Build
-  //===================================
-  function void build_phase(uvm_phase phase);
-    super.build_phase(phase);
-    m_reg_fetcher = reg_fetcher::type_id::create("m_reg_fetcher",this);
-    //m_decoder = decoder::type_id::create("m_decoder",this);
-    m_rf = regfile::type_id::create("rf");
-    uvm_config_db#(regfile)::set(this, "*", "regfile",m_rf);
-  endfunction
-
-  //==================================
-  // Connect
-  //=================================
-  function void connect_phase(uvm_phase phase);
-     super.connect_phase(phase);
-
-     //m_mon_ap.connect(m_imp);
-
-     //Don't worry about the reg-fetcher stuff for this test
-     //m_monitor.put_port.connect(m_reg_fetcher.put_port);
-     //m_monitor.trans_port_inst32.connect(m_decoder.trans_export_inst32);
-  endfunction // connect_phase
-
-endclass
+import riscv_vip_unit_test_pkg::*;
 
 
 module inst32_sformat_unit_test;
