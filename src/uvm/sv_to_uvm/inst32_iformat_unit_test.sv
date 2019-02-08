@@ -34,7 +34,7 @@ import riscv_vip_unit_test_pkg::*;
 module inst32_iformat_unit_test;
   import svunit_pkg::svunit_testcase;
 
-  string name = "inst32_ut";
+  string name = "inst32_iformat_ut";
   svunit_testcase svunit_ut;
 
   //Interface and clock stuff

@@ -31,10 +31,10 @@ import svunit_pkg::*;
 import riscv_vip_unit_test_pkg::*;
 
 
-module inst32_sformat_unit_test;
+module inst32_jformat_unit_test;
   import svunit_pkg::svunit_testcase;
    
-  string name = "inst32_ut";
+  string name = "inst32_jformat_ut";
   svunit_testcase svunit_ut;
 
   //Interface and clock stuff
@@ -88,51 +88,50 @@ module inst32_sformat_unit_test;
   //===================================
   `SVUNIT_TESTS_BEGIN    
 
-  `SVTEST(inst32_uformat_cov)
-    int bins_hit = 0;
-    const int TOT_BINS = 7;
-    const int IMM_BITS = 20;   
-    const int MIN_NEG = -(2**IMM_BITS)/2;
-    const int MAX_POS = (2**IMM_BITS)/2-1;
+  `SVTEST(inst32_jformat_cov)
 
-    test_u_imm(      10, 100.0*  bins_hit/TOT_BINS); //imm of        10, 0/7 bins hit
-    test_u_imm(       0, 100.0*++bins_hit/TOT_BINS); //imm of         0, 1/7 bins hit  
-    test_u_imm(      -1, 100.0*++bins_hit/TOT_BINS); //imm of  all ones, 2/7 bins hit  
-    test_u_imm(      -1, 100.0*  bins_hit/TOT_BINS); //imm of  all ones, 2/7 bins hit  
-    test_u_imm(       1, 100.0*++bins_hit/TOT_BINS); //imm of         1, 3/7 bins hit  
-    test_u_imm(       2, 100.0*++bins_hit/TOT_BINS); //imm of         2, 4/7 bins hit  
-    test_u_imm(       4, 100.0*++bins_hit/TOT_BINS); //imm of         4, 5/7 bins hit  
-    test_u_imm( MIN_NEG, 100.0*++bins_hit/TOT_BINS); //imm of   min neg, 6/7 bins hit  
-    test_u_imm( MAX_POS, 100.0*++bins_hit/TOT_BINS); //imm of   max pos, 7/7 bins hit  
+   int bins_hit = 0;
+   const int TOT_BINS = 6;
+   const int IMM_BITS = 21;  
+   const int MIN_NEG = -(2**IMM_BITS)/2;
+   const int MAX_POS = (2**IMM_BITS)/2-2;  //LSB always 0 for J type
 
-    //TODO: test cross
-  
-  `SVTEST_END
+   test_j_imm(      10, 100.0*  bins_hit/TOT_BINS); //imm of        10, 0/7 bins hit
+   test_j_imm(       0, 100.0*++bins_hit/TOT_BINS); //imm of         0, 1/7 bins hit  
+   test_j_imm(      -2, 100.0*++bins_hit/TOT_BINS); //imm of  all ones, 2/7 bins hit  
+   test_j_imm(      -2, 100.0*  bins_hit/TOT_BINS); //imm of  all ones, 2/7 bins hit  
+   test_j_imm(       2, 100.0*++bins_hit/TOT_BINS); //imm of         2, 4/7 bins hit
+   test_j_imm(       4, 100.0*++bins_hit/TOT_BINS); //imm of         4, 5/7 bins hit
+   test_j_imm( MIN_NEG, 100.0*++bins_hit/TOT_BINS); //imm of   min neg, 6/7 bins hit  
+   test_j_imm( MAX_POS, 100.0*++bins_hit/TOT_BINS); //imm of   max pos, 7/7 bins hit  
+
+   //TODO test cross
+    
+  `SVTEST_END     
 
 
   `SVUNIT_TESTS_END
 
-  task automatic test_u_imm(
-                      imm_high_t imm,
+  task automatic test_j_imm(
+                      j_imm_t imm,
                       real exp_cov
                       );
-
-    inst32_uformat i32u; 
-    imm_high_t gotten_imm; 
+    inst32_jformat i32j; 
+    j_imm_t gotten_imm; 
     real cov;
-      
-    i32u = inst32_uformat::new_from_op_imm(my_decoder_wrapper,LUI_MAP,imm);    
+    bit pass = 0;
     
-    gotten_imm = i32u.get_imm();
-    `FAIL_UNLESS_LOG(gotten_imm == imm, $psprintf("gotten_imm = %d, exp imm=%d", gotten_imm, imm));   
+    i32j = inst32_jformat::new_from_imm(my_decoder_wrapper,imm);    
 
+    gotten_imm = i32j.get_imm();
+    `FAIL_UNLESS_LOG(gotten_imm == imm, $psprintf("gotten_imm = %d, exp imm=%d", gotten_imm, imm));   
+    
     //Sample and check coverage
-    i32u.sample_cov();          
-    cov = i32u.get_imm_cov();
-    `FAIL_UNLESS_LOG(int'(cov) == int'(exp_cov), $psprintf("U imm_cov = %d, expect %d",cov,exp_cov))
+    i32j.sample_cov();          
+    cov = i32j.get_imm_cov();
+    `FAIL_UNLESS_LOG(int'(cov) == int'(exp_cov), $psprintf("J imm_cov() = %d, expect %d",cov,exp_cov))
 
   endtask
-
 
 
 endmodule
