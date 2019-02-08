@@ -45,5 +45,8 @@ i32s_ut:
 i32i_ut:
 	runSVUnit -uvm -t sv_to_uvm/inst32_iformat_unit_test.sv -s $(SIMR) -f riscv_vip_uvc.f $(SIMR_ARGS)
 
+i32u_ut:
+	runSVUnit -uvm -t sv_to_uvm/inst32_iformat_unit_test.sv -s $(SIMR) -f riscv_vip_uvc.f $(SIMR_ARGS)
+
 clean:
 	rm -Rf work/*
