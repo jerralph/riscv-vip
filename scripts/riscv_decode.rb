@@ -205,7 +205,11 @@ class BInst < InstBase
     b10to5 = get_field(30,25)
     b4to1  = get_field(11,8)
     b11    = get_field(7,7)
-    imm = (b12 << 12) + (b11 << 11) + (b10to5 << 5) + (b4to1 << 1) 
+    imm = (b12 << 12) + (b11 << 11) + (b10to5 << 5) + (b4to1 << 1)
+
+    #sign extend
+    imm += 0xFFFF_E0000 if b12 == 1
+
     return imm
   end
   def inst_name()
